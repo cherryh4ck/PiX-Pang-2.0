@@ -1,0 +1,207 @@
+Global
+	fmars_ybajar;
+	fmars_dire;
+	fmars_timerbajar;
+	fmars_xmoverse;
+	fmars_bichos;
+	fmars_song;
+End
+
+Process fmars();
+Private
+	id_fondo;
+Begin
+	file=load_fpg("fpg/monstruos/fmars.fpg");
+	id_fondo=pon_fondo(load_image("fondos/monstruos/fmars.jpg"));
+	fmars_song=load_song("cd-ogg/monstruos/fmars.xm");
+	play_song(fmars_song,99);
+	from x=1 to 8;
+		fmars_malo(79*x,40+60,0);
+		fmars_malo(79*x,40+120,1);
+		fmars_malo(79*x,40+180,2);
+	end
+	fmars_bichos=24;
+	readyando();
+	while(bolas>0) 
+		frame; 
+		if(fmars_dire==0);
+			fmars_xmoverse=-2;
+		end
+		if(fmars_dire==1);
+			fmars_xmoverse=2;
+		end
+		if(fmars_ybajar>0 && fmars_timerbajar>=fmars_bichos)
+			fmars_ybajar--;
+		end
+	end
+	stop_song();
+	unload_fpg(file);
+	unload_song(fmars_song);
+	jefe=0;
+	signal(id_fondo,s_kill);
+	if(modo_juego==1) fondos_panic(); end
+	if(modo_juego==2) fondos_tour(); end
+end
+
+process fmars_malo(x,y,int tipo);
+private
+	int choque;
+	int graphbase;
+	int id_disp;
+	int vez;
+begin
+	file=father.file;
+	bolas++;
+	if(tipo==0);
+		graphbase=1;
+	end
+	if(tipo==1);
+		graphbase=101;
+	end
+	if(tipo==2);
+		graphbase=201;
+	end
+	graph=graphbase;
+	z=-2;
+	size=130;
+	repeat
+		while(ready==0) frame; end
+		if(fmars_ybajar>0);
+			fmars_timerbajar++;
+			y+=20;
+		end
+		frame(20+(fmars_bichos*5));
+		if(vez==2) vez=1; end
+		if(vez==3) vez=0; end
+		if(vez==0)
+			if(animglobal<15)
+				graph=graphbase;
+			end
+			if(animglobal<30 and animglobal=>15)
+				graph=graphbase+1;
+			end
+			if(animglobal<45 and animglobal=>30)
+				graph=graphbase+2;
+			end
+			if(animglobal<60 and animglobal=>45)
+				graph=graphbase+3;
+			end
+			if(animglobal==59) vez=2; end
+		end
+		if(vez==1)
+			if(animglobal<15)
+				graph=graphbase+4;
+			end
+			if(animglobal<30 and animglobal=>15)
+				graph=graphbase+3;
+			end
+			if(animglobal<45 and animglobal=>30)
+				graph=graphbase+2;
+			end
+			if(animglobal<60 and animglobal=>45)
+				graph=graphbase+1;
+			end
+			if(animglobal==59) vez=3; end
+		end
+		if(ready==1)
+			if(rand(0,1000)==5);
+				fmars_lanzabola();
+			end
+			x+=fmars_xmoverse;
+			if(x=>740 && fmars_dire==1);
+				fmars_dire=0;
+			end
+			if(x<60 && fmars_dire==0);
+				fmars_ybajar=1;
+				fmars_dire=1;
+			end
+		end
+		if(collision(type muneco1)) p1_muere=1; break; end
+		if(collision(type muneco2)) p2_muere=1; break; end
+	Until((id_disp=collision(Type cachodisp)) OR (id_disp=collision(Type cachodisp2)) OR (id_disp=collision(Type dispcab) OR (id_disp=collision(Type dispcab2)) OR (id_disp=collision(Type cachodisp3)) OR (id_disp=collision(Type cachodisp4)) OR (id_disp=collision(Type dispcab3)) OR (id_disp=collision(Type dispcab4))))
+	If((collision(Type cachodisp) OR collision(Type dispcab)) AND (collision(Type cachodisp2) OR collision(Type dispcab2)))
+		signal(p1_disparos[1],s_kill); p1_disparos[1]=0; signal(p1_disparos[2],s_kill); p1_disparos[2]=0; 
+		If(players==1 OR players==3) p1_bonus+=500; p1_puntos+=1000; End
+		p1_bolas++;
+	End
+	If(collision(Type cachodisp) OR collision(Type dispcab) OR collision(Type cachodisp2) OR collision(Type dispcab2))
+		If(p1_arma==4) signal(id_disp,s_kill); End
+		If(collision(Type cachodisp) OR collision(Type dispcab)) signal(p1_disparos[1],s_kill); p1_disparos[1]=0; End
+		If(collision(Type cachodisp2) OR collision(Type dispcab2)) signal(p1_disparos[2],s_kill); p1_disparos[2]=0;  End
+		If(players==1 OR players==3) p1_bonus+=500; p1_puntos+=1000; End
+		p1_bolas++;
+	End
+	If((collision(Type cachodisp3) OR collision(Type dispcab3)) AND (collision(Type cachodisp4) OR collision(Type dispcab4)))
+		signal(p2_disparos[1],s_kill); p2_disparos[1]=0; signal(p2_disparos[2],s_kill); p2_disparos[2]=0; 
+		If(players==2 OR players==3) p2_bonus+=500; p2_puntos+=1000; End
+		p2_bolas++;
+	End
+	If(collision(Type cachodisp3) OR collision(Type dispcab3) OR collision(Type cachodisp4) OR collision(Type dispcab4))
+		If(p2_arma==4) signal(id_disp,s_kill); End
+		If(collision(Type cachodisp3) OR collision(Type dispcab3)) signal(p2_disparos[1],s_kill); p2_disparos[1]=0; End
+		If(collision(Type cachodisp4) OR collision(Type dispcab4)) signal(p2_disparos[2],s_kill); p2_disparos[2]=0; End
+		If(players==2 OR players==3) p2_bonus+=500; p2_puntos+=1000; End
+		p2_bolas++;
+	End
+	fmars_explosion(x,y);
+	bolas--;
+	fmars_bichos--;
+end
+
+process fmars_explosion(x,y);
+begin
+	z=father.z+1;
+	suena(s15);
+	size=120;
+	file=father.file;
+	for(alto=0;alto<12;alto++)
+		while(ready==0) frame; end
+		graph=300+alto;
+		frame;
+	end
+end
+
+process fmars_lanzabola();
+begin
+	alto=rand(1,4);
+	x=father.x;
+	y=father.y+20;
+	switch(alto)
+		case 1:
+			graph=701;
+		end
+		case 2:
+			graph=711;
+		end
+		case 3:
+			graph=801;
+			size=30;
+		end
+		case 4:
+			graph=717;
+		end
+	end
+	alpha=180;
+	while(!collision(type grafico))
+		while(ready==0) frame; end
+		y+=4;
+		angle+=20000;
+		if(collision(type muneco1)) p1_muere=1; end
+		if(collision(type muneco2)) p1_muere=2; end
+		frame;
+	end
+	switch(alto)
+		case 1:
+			bola(x,y,1,rand(0,1));
+		end
+		case 2:
+			bola(x,y,6,rand(0,1));
+		end
+		case 3:
+			bola(x,y,10,rand(0,1));
+		end
+		case 4:
+			bola(x,y,13,rand(0,1));
+		end
+	end
+end

@@ -1,0 +1,29 @@
+process made_with_fenix();
+begin
+	let_me_alone();
+	x=400; y=300;
+	graph=load_image(".\cosas\fenix.jpg");
+	parpadeo();
+	from z=0 to 300; if(key(_enter)) break; end frame; end
+	from alpha=255 to 0 step -10; frame; end
+	id_titulo=titulo();
+end
+
+process panreyes1();
+begin
+	let_me_alone();	
+	musica(10);
+	x=400;
+	y=300;
+	alpha=0;
+	put_screen(0,0);
+	graph=load_png(".\cosas\pixlogo2.png");
+	while(!key(_enter) and z<300)
+		if(z<60) alpha=z*4; end
+//		if(z>230) alpha=(300-z)*4; end
+		z++;
+		frame; 
+	end
+        unload_map(graph,0);
+        made_with_fenix();
+end

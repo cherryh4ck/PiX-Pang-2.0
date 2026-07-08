@@ -1,0 +1,163 @@
+Global
+	y_cred;
+	pintarcreditos;
+End
+
+// tributo al ending de chobits... aww! this is so cute! :D
+Process creditos2();
+Begin
+	clear_screen();
+	y_cred=0;
+	mouse.graph=0;
+	x=400; y=300;
+	dump_type=1;
+	restore_type=1;
+	let_me_alone();
+	delete_text(all_text);
+	set_fps(30,5);
+	credchobits();
+	credfondo();
+	//musica(2);
+	stop_song();
+	timer[6]=0;
+	play_song(load_song("./cd-ogg/creditos.it"),0);
+	// son una pasada las canciones originales, pero no tenemos los derechos xD
+/*	if(rand(0,1)==0)
+		play_song(load_song("./cd-ogg/creditos2.ogg"),0);
+	else
+		play_song(load_song("./cd-ogg/creditos.ogg"),0);
+	end*/
+	txt_creditos(textos[14],0,0); y_cred++;
+	txt_creditos("Pablo Antonio Navarro Reyes",0,5);
+	frame(20000);
+	txt_creditos(textos[16],0,0); y_cred++;
+	txt_creditos("Carles Vicent Gines",0,4);
+	frame(20000);
+	txt_creditos("Graficos",0,0); y_cred++;
+	txt_creditos("Daniel García Moreno",0,6);
+	frame(20000);
+	txt_creditos("Musica",0,0); y_cred++;
+	txt_creditos("Benny Beat",0,4);
+	txt_creditos("Daniel Aguayo",0,6);
+	frame(20000);
+	txt_creditos("Traducciones",0,0); y_cred++;
+	txt_creditos("SirTobi",0,4);
+	txt_creditos("Aljosa Gergolet",0,6);
+	txt_creditos("Dario Cerredelo",0,4);
+	txt_creditos("",0,6);
+	txt_creditos("",0,4);
+	txt_creditos("",0,6);
+	frame(20000);
+	txt_creditos(textos[15],0,0); y_cred++;
+	txt_creditos("www.openclipart.org",0,4);
+	txt_creditos("Aquafish",0,4);
+	txt_creditos("Jesus Basco",0,6);
+	txt_creditos("Nicolas",0,4);
+	frame(20000); y_cred++;
+	txt_creditos("Murdok",0,6);
+	txt_creditos("Loosers juegos",0,6);  
+        txt_creditos("Sergio 'Moran'",0,6);
+        txt_creditos("Calamix",0,6);
+	frame(20000);  y_cred++;
+	txt_creditos(textos[17],0,4);
+	txt_creditos(textos[18],0,4);
+	frame(20000);
+	txt_creditos(textos[20],0,0); y_cred++;
+	txt_creditos("Noelia",0,5);
+	txt_creditos("Carles",0,5);
+	txt_creditos("Nicolas",0,5);
+	txt_creditos("Jara",0,4);
+	txt_creditos("Laura",0,4);
+	frame(20000);
+	txt_creditos("Maria del Mar",0,5);
+	txt_creditos("Virginia",0,5);
+	txt_creditos("Alejandra",0,5);
+	txt_creditos("Raquel",0,5);
+	frame(20000);
+	txt_creditos("Luis",0,5);
+	txt_creditos("Sepia",0,5); y_cred++;
+	txt_creditos("Toda al2ci1h",0,4);
+	txt_creditos("...",0,0);
+ 	frame(20000);
+	txt_creditos("A la gente del foro de Fenix",0,5);
+	txt_creditos("Fenix Proyecto Team",0,5);
+	txt_creditos("Slainte & Cebrian",0,5);
+	frame(20000);
+	y_cred++;
+	txt_creditos("Gracias por jugar ;)",0,-1);
+	y_cred++;
+	txt_creditos("PiX Pang 2.0",0,-1);
+	txt_creditos("www.pixjuegos.com",0,-1);
+	txt_creditos("contacto@pixjuegos.com",0,-1);
+	while(timer[6]<9300) frame; end
+	set_fps(60,9);
+	dump_type=0;
+	restore_type=0;
+	if(ganando==0)
+		id_titulo=titulo(); 
+	else
+		gameover();
+	end
+End        
+
+
+Process txt_creditos(string txt1,int foto,int coulour);
+begin
+	graph=write_in_map(fnt4,txt1,4);
+	x=400;          
+	y=200+(y_cred*50);
+	y_cred++;
+	z=-3;
+	from alpha=0 to 255 step 6; frame; end
+	frame(6000);
+	if(coulour==-1) loop frame; end end
+	from alpha=255 to 0 step -6; frame; end
+	y_cred=0;
+end                 
+	
+process credchobits();
+begin
+	file=fpg_creditos;
+	x=1600;
+	y=-400;
+	resolution=4;   
+	credsombra();
+	loop
+		from graph=1 to 156; y++; frame; end
+		graph=157;
+		frame; 
+	end
+end
+
+process credsombra();
+begin
+	file=fpg_creditos;
+	size_y=80;
+	resolution=4;
+	alpha=60;
+	flags=2;
+	z=1;
+	loop
+		x=father.x;
+		y=father.y+((graphic_info(file,graph,g_height))+((graphic_info(file,graph,g_height)*size_y)/50))+100;
+		graph=father.graph;
+		frame; 
+	end
+end
+
+process credfondo();
+begin
+	file=fpg_creditos;
+	graph=999;
+	resolution=4;
+	x=1600;
+	y=-1000;
+	z=2;
+	repeat
+		y++;
+		frame;
+	until(y>2300)
+	loop
+		frame;
+	end
+end

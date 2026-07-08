@@ -1,0 +1,141 @@
+Global
+	f1,fondomap[1];idtipo1;idtipo2;
+	xr1;yr1;xr2;yr2;
+	pared=1600;//ancho del nivel
+	piso=600;//alto del nivel
+	suelo=550; //donde se paran
+	resolx=800;resoly=600;//ressolucion
+	Vresolx=800;Vresoly=600;//resolucion del cuadrado a recortar con el zoom
+	xfoco;yfoco; //coordenadas del foco de la camara;
+	idcamara;//id de la camara :P
+	distancia; //distancia entre tipos
+	FLOAT zoom=1; //ZOOM
+End
+Process prueba();
+BEGIN
+	PRIORITY=100000;
+	//------------------- CREA EL NIVEL
+	fondomap[0]=NEW_MAP(pared,piso,16);
+	fondomap[1]=LOAD_IMAGE(".\cosas\safari.jpg");
+	DEFINE_REGION(1,-1000,-1000,0,0);
+	START_SCROLL(1,0,fondomap[0],0,1,0);
+	MAP_PUT(0,fondomap[0],fondomap[1],256,800);
+	MAP_PUT(0,fondomap[0],fondomap[1],768,800);
+	MAP_PUT(0,fondomap[0],fondomap[1],1280,800);
+	MAP_PUT(0,fondomap[0],fondomap[1],1792,800);
+	MAP_PUT(0,fondomap[0],fondomap[1],2304,800);
+	MAP_PUT(0,fondomap[0],fondomap[1],2816,800);
+	MAP_PUT(0,fondomap[0],fondomap[1],3328,800);
+	MAP_PUT(0,fondomap[0],fondomap[1],3840,800);
+	MAP_PUT(0,fondomap[0],fondomap[1],4352,800);
+	MAP_PUT(0,fondomap[0],fondomap[1],4864,800);
+	//-----------------------------------------------------
+
+	idtipo1=jugador(1); idtipo2=jugador(2);idcamara=camara();
+
+	WRITE_INT(0,50,10,4,OFFSET idtipo1.X);
+	WRITE_INT(0,50,40,4,OFFSET idtipo1.Y);
+	WRITE_INT(0,100,10,4,OFFSET idtipo2.X);
+	WRITE_INT(0,100,40,4,OFFSET idtipo2.Y);
+
+	WRITE_FLOAT(0,500,10,4,OFFSET zoom);
+	WRITE_INT(0,500,20,4,OFFSET distancia);
+
+	WRITE_INT(0,320,13,4,OFFSET fps);
+	WRITE_INT(0,320,56,4,OFFSET speed_gauge);
+
+	regenerafondo();
+ 	LOOP
+	 	IF(KEY(_1))zoom+=0.05;END
+	 	IF(KEY(_2))zoom-=0.05;END
+	 	IF(KEY(_3))zoom=3;END
+		If(key(_esc)) exit(0,0); end
+	 	distancia=ABS(FGET_DIST(xr1,yr1,xr2,yr2));
+	 	IF(distancia>=1200)distancia=1200;END
+	 	IF(distancia<=200)distancia=200;END
+	 	zoom=((distancia+50)*2.5)/1200;
+	 	FRAME;
+ 	END
+END
+//--------------
+PROCESS jugador(t); //este es el jugador real cituado en el scroll
+BEGIN
+	CTYPE=C_SCROLL;
+	PRIORITY=100;
+	FILE=load_fpg("/c/Linux/PiXPang/fpg/pixpang.fpg");Z=100;
+	SWITCH(t)
+		CASE 1:GRAPH=501;X=500;Y=suelo;jugadorcopia(1);END
+		CASE 2:GRAPH=551;X=700;Y=suelo;jugadorcopia(2);END
+	END
+
+	LOOP
+		SWITCH(t)
+			CASE 1:
+				IF(KEY(_LEFT) AND X>0);X-=20;END
+				IF(KEY(_RIGHT) AND X<pared)X+=20;END
+				IF(KEY(_UP) AND Y>0)Y-=20;END
+				IF(KEY(_DOWN) AND Y<suelo)Y+=20;END
+				xr1=X;yr1=Y;
+			END
+			CASE 2:
+				IF(KEY(_A) AND X>0);X-=10;END
+				IF(KEY(_D) AND X<pared);X+=10;END
+				IF(KEY(_W) AND Y>0)Y-=10;END
+				IF(KEY(_S) AND Y<suelo)Y+=10;END
+				xr2=X;yr2=Y;
+			END
+		END
+		FRAME;
+	END	
+END
+//-------------------------------------------copia
+PROCESS jugadorcopia(t); //copia que se visualiza dentro de la pantalla
+BEGIN
+	PRIORITY=-100; FILE=FATHER.FILE;Z=FATHER.Z;GRAPH=FATHER.GRAPH;
+	LOOP
+		SIZE=100/zoom;
+		SWITCH(t)
+			CASE 1:
+				X=((resolx/2)-(xfoco-xr1)/zoom);
+				Y=((resoly/2)-(yfoco-yr1)/zoom);
+			END
+			CASE 2:
+				X=((resolx/2)-(xfoco-xr2)/zoom);
+				Y=((resoly/2)-(yfoco-yr2)/zoom);
+			END
+		END
+		FRAME;
+	END
+END
+//-----------------
+PROCESS regenerafondo();
+PRIVATE
+fondo;
+BEGIN
+	PRIORITY=-100000;
+	LOOP
+		CLEAR_SCREEN();
+		fondo=NEW_MAP(Vresolx,Vresoly,16);
+		MAP_BLOCK_COPY(0,fondo,0,0,fondomap[0],xfoco-Vresolx/2,yfoco-Vresoly/2,Vresolx,Vresoly,0);
+		XPUT(0,fondo,resolx/2,resoly/2,0,100/zoom,0,0);
+		FRAME;
+	   UNLOAD_MAP(0,fondo);
+	END
+END
+//----------------------------------------------------
+PROCESS camara(); //la camara real que esta en es scroll
+BEGIN
+ PRIORITY=0;CTYPE=C_SCROLL;
+ Y=100;
+ LOOP
+  X=(idtipo1.X+idtipo2.X)/2;
+  Y=((idtipo1.Y+idtipo2.Y)/2)-40;   // el-40 es la mitad y mitad de arriba y abajo q se debe tener en cuenta por culpa del choque de cabeza con la camara arriba
+  xfoco=X;yfoco=Y;
+  Vresolx=resolx*zoom;Vresoly=resoly*zoom;
+  IF(X>pared-Vresolx/2)xfoco=pared-Vresolx/2;END
+  IF(Y>piso-Vresoly/2)yfoco=piso-Vresoly/2;END
+  IF(X<Vresolx/2)xfoco=Vresolx/2;END
+  IF(Y<Vresoly/2)yfoco=Vresoly/2;END
+  FRAME;
+ END;
+END;

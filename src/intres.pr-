@@ -1,0 +1,1337 @@
+GLOBAL
+	elegido;
+	eligiendo;
+	tonto_el_que_lo_lea;
+	retraso=200;
+	string texto_menu;
+	string texto_menu_anterior;
+end
+
+Process int3torneo();
+Begin
+	let_me_alone();
+	if(torneo==1) write(fnt1,400,300,4,"TORNEO - Modo locura"); end
+	if(torneo==2) write(fnt1,400,300,4,"TORNEO - Modo aventura"); end
+	write(fnt1,400,350,4,"Esperando...");
+	while(!key(_g) and !key(_o)) frame; end
+	if(torneo==1)	
+		ops.p1_personaje=1;
+		musica(0);
+		inicio();		
+		return;
+	end
+	if(torneo==2)
+		modo_juego=2;
+		mundo=0;
+		ops.p1_personaje=1;
+		inicio();		
+		return;
+	end
+End
+
+Process int3titulo();
+Private
+	existepartida;
+	struct partidaguardada;
+		int pgpuntos[1];
+		byte pgplayers;
+		byte pgmundo;
+		byte pgvidas[1];
+	end
+Begin
+	mouse.graph=0;
+	mod_england=0;
+//	players=1;
+	priority=1;
+	ganando=0;
+	p1_disparos[1]=0;
+	modo_juego=1;
+	x=400; y=300;
+	elegido=0;
+	eligiendo=0;
+	if(torneo!=0)
+		int3torneo();
+		return;
+	end
+	graph=img_pixpang;
+	//texto_intro(TEXTOS[35],1);
+//	int3titulo2();
+	size=0;
+	frame(2000);
+/*	if(ops.op_sombras) alpha=55;
+		from size=0 to 100 step 1; alpha+=2; frame; end
+	else
+		alpha=255;
+		size=100;
+	end */
+	size=100;
+	from alpha=0 to 255 step 20; frame; end
+//	while(tonto_el_que_lo_lea<120) frame; end
+	timer[4]=0;
+	z=-512;
+	while(!key(_enter) and !mouse.left) 
+		if(key(_esc)) exit(0,0); end
+		if(timer[4]>500)
+			let_me_alone(); demo(); que_toca=1; from alpha=255 to 0 step -10; frame; end Return;
+		end
+		frame; 
+	end
+	timer[0]=0;
+	//while(timer[0]<300) frame; end
+	int3titulo2();
+	alpha=32;
+	frame(200);
+	delete_text(all_text);
+	let_me_alone();
+	while(key(_enter)) frame; end
+	if(primerapartida) int3_tutorial(); return; end
+	If(op_guardar)
+	    If(pixpangcd) 
+    	    	existepartida=file_exists("c:\PiXPang\partida.dat");
+	    Else                                    
+    	    	existepartida=file_exists(".\partida.dat");
+	    End
+	End
+	if(existepartida==1)
+		If(op_guardar)
+		    If(pixpangcd) 
+	    	    	load("c:\PiXPang\partida.dat",partidaguardada);
+					if(partidaguardada.pgmundo!=0)
+						graph=load_png("c:\PiXPang\partida.png");
+					end
+		    Else                                    
+	    	    	load(".\partida.dat",partidaguardada);
+					if(partidaguardada.pgmundo!=0)
+						graph=load_png(".\partida.png");
+					end
+		    End
+		End
+		if(partidaguardada.pgmundo!=0)
+			size=75;
+			alpha=200;
+			write(fnt1,400,40,4,textos[64]);
+			write(fnt1,400,80,4,textos[65]);
+			write(fnt1,400,400,4,"(Y) "+textos[33]+"  (N) "+textos[34]);
+			while(!key(_n))
+				if(key(_y))
+					modo_juego=2;
+					p1_puntos=partidaguardada.pgpuntos[0];
+					p2_puntos=partidaguardada.pgpuntos[1];
+					players=partidaguardada.pgplayers;
+					mundo=partidaguardada.pgmundo;
+					p1_vidas=partidaguardada.pgvidas[0];
+					p2_vidas=partidaguardada.pgvidas[1];
+					let_me_alone();
+					inicio();
+					return;
+				end
+				frame; 
+			end
+/*			If(op_guardar)
+			    If(pixpangcd) 
+				partidaguardada.pgmundo=0;
+		    	    	save("c:\PiXPang\partida.dat",partidaguardada);
+			    Else                                    
+				partidaguardada.pgmundo=0;
+		    	    	save(".\partida.dat",partidaguardada);
+			    End
+			End
+*/
+			graph=0;
+			delete_text(all_text);
+		end
+	end
+	if(ops.op_sombras) retraso=200; else retraso=6000; end
+	int3_cuadro1();
+	int3_cuadro2();
+	int3_cuadro3();
+	int3_cuadro4();
+	int3_cuadrosalir();
+	ratonera();
+	musica(5);
+	write_string(fnt1,400,600,7,offset texto_menu);
+	loop
+		texto_menu_anterior=texto_menu;
+		while(texto_menu_anterior==texto_menu)
+			frame;
+		end
+		restore_type=1; dump_type=1;
+		frame;
+		restore_type=0; dump_type=0;
+	end
+End
+
+Process int3titulo2();
+Private
+	tiempo;
+Begin
+	ahora_toca++;
+	if(ahora_toca==3) ahora_toca=0; end
+	players=1;
+	x=400;
+	y=300;
+	//graph=load_png(".\cosas\titulo.png");
+	size_x=10;
+	size_y=10;
+	angle=30000;
+	z=-512;
+	tonto_el_que_lo_lea=0;
+	/*if(ops.op_sombras) 
+		from alpha=0 to 255 step 3; size_x++; size_y++; tonto_el_que_lo_lea++; angle-=25000; frame; end
+		while(tonto_el_que_lo_lea<120)
+			tonto_el_que_lo_lea++; 
+			angle-=25000;
+			size_x++;
+			size_y++;
+			frame;
+		end
+	else		
+		tonto_el_que_lo_lea=120;
+		size_x=130;
+		size_y=130;
+	end*/
+        tonto_el_que_lo_lea=120;
+	size_x=130;
+	size_y=130;
+	angle=15000;
+	tiempo=300;
+/*	while(!key(_enter) and mouse.left) 
+		if(key(_t)) 
+			torneo=1; 
+			ops.p1_personaje=1;
+			musica(0);
+			inicio();
+			return;
+		end
+		p1_muere=0;
+		p2_muere=0;
+		ganando=0;
+		players=0;	
+		modo_juego=0;
+		tiempo--;
+		If(tiempo<0)
+			let_me_alone(); 
+//			if(ahora_toca<2) demo(); else if(ops.records) records(); else demo(); end end
+			if(ahora_toca<2) demo(); else demo(); end
+			Return;
+		End
+		frame; 
+	end*/
+	graph=load_png(".\cosas\titulo.png");
+	x=400;
+	y=70;
+	angle=0;
+	size_x=100;
+	size_y=100;
+	delete_text(all_text);
+	frame;
+	p1_muere=0;
+	p2_muere=0;
+//	players=1;
+	ganando=0;
+	modo_juego=1;
+	put_screen(0,get_screen());
+End
+
+Process ratonera();
+Begin
+	mouse.graph=517;
+	graph=517;
+	mouse.x=400; mouse.y=300;
+	if(ops.op_sombras) alpha=0; end
+	mouse.angle=110000;
+	mouse.x=400; mouse.y=300;
+	z=-512;
+	size=10;
+	loop
+		if((key(_enter) or mouse.left) and (collision(type int3_cuadrosalir) or collision(type int3_cuadro1) or collision(type int3_cuadro2) or collision(type int3_cuadro3) or collision(type int3_cuadro4) or collision(type int3_cuadro5) or collision(type int3_cuadro6) or collision(type int3_cuadro7) or collision(type int3_cuadro8) or collision(type int3_cuadro9) or collision(type int3_cuadro10) or collision(type int3_cuadro11) or collision(type int3_cuadro12) or collision(type int3_volver1)))
+			suena(s7);
+			elegido=eligiendo;
+			eligiendo=0;
+		end
+		if(key(_esc)) let_me_alone(); titulo(); return; end
+		if(key(_up)) mouse.y-=10; end
+		if(key(_down)) mouse.y+=10; end
+		if(key(_left)) mouse.x-=10; end
+		if(key(_right)) mouse.x+=10; end
+		while(elegido!=0) frame; end
+		x=mouse.x-5;
+		y=mouse.y-15;
+		frame;
+	end
+End
+
+/* Jugar - Opciones
+Crear pantalla - Creditos
+         salir */
+
+Process int3_cuadro1(); //Jugar
+Begin
+	x=200;
+	y=240;
+	z=-1;
+	graph=100;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	if(ops.op_sombras) angle=51000; from size_x=0 to 100 step 3; angle-=1500; frame; end else size_x=80; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=1) texto_menu=textos[59]; suena(s9); end eligiendo=1; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; if(elegido==1) size_x++; size_y++; end frame; end end
+	if(elegido!=1) return; end
+	frame(retraso);
+	elegido=0;
+	int3_volver1();
+	int3_cuadro5();
+	int3_cuadro6();
+//	int3_cuadro7();
+	int3_cuadro8();
+End
+
+Process int3_volver1();
+Begin
+	size_x=30;
+	size_y=30;
+	x=70;
+	y=93;
+	graph=100;
+	if(ops.op_sombras) from alpha=0 to 150 step 5; frame; end else alpha=150; end
+	while(elegido==0)
+		if(collision(type ratonera)) eligiendo=-2; alpha=255; size_x=40; size_y=40; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=30; size_y=30; end
+			if(size_x>30) size_x--; end
+			if(size_y>30) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; size_x++; size_y++; frame; end end
+	if(elegido!=-2) return; end
+	frame(retraso);
+	elegido=0;
+	int3_cuadro1();
+	int3_cuadro2();
+	int3_cuadro3();
+	int3_cuadro4();
+End
+
+Process int3_cuadro2(); //Opciones
+Begin
+	x=600;
+	y=240;
+	z=-1;
+	graph=101;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	if(ops.op_sombras) angle=-51000; from size_x=0 to 100 step 3; angle+=1500; frame; end else size_x=80; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=2) suena(s9); texto_menu=textos[54]; end eligiendo=2; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	if(elegido!=2) return; end
+	int3ops(); 
+End
+
+Process int3_cuadro3(); //Crear pantalla
+Begin
+	x=200;
+	y=460;
+	z=-1;
+	graph=102;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	if(ops.op_sombras) angle=-51000; from size_x=0 to 100 step 3; angle+=1500; frame; end else size_x=80; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=3) suena(s9); texto_menu=textos[55]; end eligiendo=3; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	if(elegido!=3) return; end
+	let_me_alone(); modo_juego=2; crear_pantalla(); return;
+End
+
+Process int3_cuadro4(); //Creditos
+Begin
+	x=600;
+	y=460;
+	z=-1;
+	graph=103;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	if(ops.op_sombras) angle=51000; from size_x=0 to 100 step 3; angle-=1500; frame; end else size_x=80; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=4) suena(s9); end eligiendo=4; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	if(elegido!=4) return; end
+	clear_screen();
+	creditos2();
+End
+
+Process int3_cuadrosalir();
+Begin
+	x=742;
+	y=93;
+	graph=108;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	z=-1;
+	if(ops.op_sombras) from size_x=0 to 100 step 3; frame; end else size_x=100; end
+	loop
+		if(elegido==-1)
+		 	If(op_guardar)
+			    If(pixpangcd) 
+		    	    	save("c:\PiXPang\opciones.dat",ops);
+			    Else                                    
+		    	    	save(".\opciones.dat",ops);
+			    End
+			End
+			If(is_playing_cd()) stop_cd(); End
+			exit(0,0); 
+		end
+		if(collision(type ratonera)) eligiendo=-1; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+End
+
+/*Menu jugar:
+Modo de juego - Jugadores
+Cargar juego - Jugar
+        volver*/
+
+Process int3_cuadro5(); // modo de juego
+Begin
+	x=200;
+	y=240;
+	z=-1;
+	graph=104;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	if(ops.op_sombras) angle=51000; from size_x=0 to 100 step 3; angle-=1500; frame; end else size_x=80; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=1) suena(s9); texto_menu=textos[57]; end eligiendo=1; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	if(elegido!=1) return; end
+	frame(retraso);
+	elegido=0;
+	int3_cuadro9();
+	int3_cuadro10();
+	int3_cuadro11();
+	int3_cuadro12();
+End
+
+Process int3_cuadro6(); // jugadores
+Begin
+	if(modo_juego==3) return; end
+	x=600;
+	y=240;
+	z=-1;
+	graph=105;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	if(ops.op_sombras) angle=-51000; from size_x=0 to 100 step 3; angle+=1500; frame; end else size_x=80; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=2) suena(s9);  texto_menu=textos[58]; end eligiendo=2; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	if(elegido!=2) return; end
+	frame(retraso);
+	elegido=0;
+	dump_type=1;
+	restore_type=1;
+	int3_cuadro13();
+	int3_cuadro14();
+	int3_cuadro15();
+	int3_cuadro16();
+	size_x=30;
+	size_y=30;
+	x=70;
+	y=93;
+	if(ops.op_sombras) from alpha=0 to 150 step 5; frame; end else alpha=255; end
+	while(elegido!=-2)
+		if(collision(type ratonera)) eligiendo=-2; alpha=255; size_x=40; size_y=40; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=30; size_y=30; end
+			if(size_x>30) size_x--; end
+			if(size_y>30) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; size_x++; size_y++; frame; end end
+	frame(retraso);
+	elegido=0;
+	dump_type=0;
+	restore_type=0;
+	int3_cuadro5();
+	int3_cuadro6();
+//	int3_cuadro7();
+	int3_cuadro8();
+	int3_volver1();
+End
+
+Process int3_cuadro7(); // cargar juego - NO UTILIZADO
+Begin
+/*	x=200;
+	y=460;
+	z=-1;
+	graph=106;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	from size_x=0 to 100 step 3; frame; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=3) suena(s9); end eligiendo=3; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			alpha-=2;
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	from alpha=255 to 0 step -5; frame; end
+	if(elegido!=3) return; end*/
+End
+
+
+Process int3_cuadro8(); // jugar!
+Begin
+	x=600;
+	y=460;
+	z=-1;
+	graph=107;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	if(ops.op_sombras) angle=-51000; from size_x=0 to 100 step 3; angle+=1500; frame; end else size_x=80; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=4) suena(s9); texto_menu=textos[59]; end eligiendo=4; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	if(elegido!=4) return; end
+	ganando=0;
+	if(ops.p1_personaje!=0 and ops.p2_personaje==0) players=1; end
+	if(ops.p1_personaje!=0 and ops.p2_personaje!=0) players=3; end
+	if(ops.p2_control==3 and players==3) cheto_ayudante=1; players=1; end
+	if(ops.p2_control!=3) cheto_ayudante=0; end
+	If(modo_juego==1 OR modo_juego==3) timer[8]=0; musica(0); End
+	If(modo_juego!=3) inicio(); Else let_me_alone(); modo_safari(); end
+End
+
+/*Menu modo de juego:
+Locura, Aventura, Safari, Personalizado, Inglaterra*/
+
+Process int3_cuadro9(); // modo locura
+Begin
+	x=200;
+	y=240;
+	z=-1;
+	graph=109;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	if(ops.op_sombras) from size_x=0 to 100 step 3; frame; end else size_x=100; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=1) suena(s9); texto_menu=textos[7]; end eligiendo=1; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	if(elegido!=1) return; end
+	modo_juego=1;
+	frame(retraso);
+	elegido=0;
+	int3_cuadro5();
+	int3_cuadro6();
+//	int3_cuadro7();
+	int3_cuadro8();
+	int3_volver1();
+End
+
+Process int3_cuadro10(); // modo aventura
+Begin
+	x=600;
+	y=240;
+	z=-1;
+	graph=110;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	if(ops.op_sombras) from size_x=0 to 100 step 3; frame; end else size_x=100; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=2) suena(s9); texto_menu=textos[8]; end eligiendo=2; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end  end
+	if(elegido!=2) return; end
+	modo_juego=2;
+//	if(key(_alt)) mod_england=1; mundo=100; suena(s6); end
+	frame(retraso);
+	elegido=0;
+	int3_cuadro5();
+	int3_cuadro6();
+//	int3_cuadro7();
+	int3_cuadro8();
+	int3_volver1();
+End
+
+Process int3_cuadro11(); //modo safari
+Begin
+	x=200;
+	y=460;
+	z=-1;
+	graph=111;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	if(ops.op_sombras) from size_x=0 to 100 step 3; frame; end else size_x=100; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=3) suena(s9); texto_menu=textos[10]; end eligiendo=3; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	if(elegido!=3) return; end
+	modo_juego=3;
+	players=1;
+	frame(retraso);
+	elegido=0;
+	int3_cuadro5();
+	int3_cuadro6();
+//	int3_cuadro7();
+	int3_cuadro8();
+	int3_volver1();
+End
+
+Process int3_cuadro12(); //modo personalizado
+Begin
+	x=600;
+	y=460;
+	z=-1;
+	graph=112;
+	size_y=100;
+	size_x=0;
+	alpha=150;
+	if(ops.op_sombras) from size_x=0 to 100 step 3; frame; end else size_x=100; end
+	while(elegido==0)
+		if(collision(type ratonera)) if(eligiendo!=4) suena(s9); texto_menu=textos[11]; end eligiendo=4; alpha=255; size_x=110; size_y=110; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x--; end
+			if(size_y>100) size_y--; end
+		end
+		frame;
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	if(elegido!=4) return; end
+	modo_juego=2;
+	mod_custom=1;
+	mundo=100;
+	If(pixpangcd)
+	    i=1;
+	    cus_levels=100;
+	    While(file_exists("c:\PiXPang\custom\tour\"+itoa(i)+".pang"))
+		    i++;
+		    cus_levels++;
+		    Frame;
+  	    End
+	    i=0;
+	Else
+	    i=1;
+	    cus_levels=100;
+	    While(file_exists(".\custom\tour\"+itoa(i)+".pang"))
+		    i++; 
+		    cus_levels++;
+		    Frame;
+	    End
+            i=0;
+        End
+	frame(retraso);
+	elegido=0;
+	int3_cuadro5();
+	int3_cuadro6();
+//	int3_cuadro7();
+	int3_cuadro8();
+	int3_volver1();
+End
+
+/*	Jugador 1 - [X, PiX Pang, Super Pang, DaniGM]
+	Jugador 2 - [X, PiX Pang, Super Pang, DaniGM]
+*/
+
+Process int3_cuadro13(); //jugador1
+Begin
+	write(fnt1,200,220,4,textos[0]);
+	graph=507; 
+	if(ops.p1_personaje==8) ops.p1_personaje=1; end
+	if(ops.p1_personaje==1) file=load_fpg(".\fpg\chars1.fpg"); end
+	if(ops.p1_personaje==2) file=load_fpg(".\fpg\chars2.fpg"); end
+	if(ops.p1_personaje==3) file=load_fpg(".\fpg\chars3.fpg"); end
+	if(ops.p1_personaje==4) file=load_fpg(".\fpg\chars4.fpg"); end
+	if(ops.p1_personaje==5) file=load_fpg(".\fpg\chars5.fpg"); end
+	if(ops.p1_personaje==6) file=load_fpg(".\fpg\chars6.fpg"); end
+	if(ops.p1_personaje==7) file=load_fpg(".\fpg\chars7.fpg"); end
+	x=200;
+	y=280;
+	if(ops.op_sombras) from size_x=0 to 100 step 3; frame; end else size_x=100; end
+	while(elegido!=-2)
+		if(collision(type ratonera)) if(eligiendo!=1) suena(s9); end eligiendo=1; alpha=255; size_x=140; size_y=140; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x-=2; end
+			if(size_y>100) size_y-=2; end
+		end
+		if(collision(type ratonera) and (mouse.left or key(_enter))) 
+			while(mouse.left or key(_enter)) frame; end 
+			ops.p1_personaje++;
+			if(ops.p1_personaje==8) ops.p1_personaje=1; end
+			if(ops.p1_personaje==1) file=load_fpg(".\fpg\chars1.fpg"); end
+			if(ops.p1_personaje==2) file=load_fpg(".\fpg\chars2.fpg"); end
+			if(ops.p1_personaje==3) file=load_fpg(".\fpg\chars3.fpg"); end
+			if(ops.p1_personaje==4) file=load_fpg(".\fpg\chars4.fpg"); end
+			if(ops.p1_personaje==5) file=load_fpg(".\fpg\chars5.fpg"); end
+			if(ops.p1_personaje==6) file=load_fpg(".\fpg\chars6.fpg"); end
+			if(ops.p1_personaje==7) file=load_fpg(".\fpg\chars7.fpg"); end
+		end
+		frame;	
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	delete_text(all_text);
+	return;
+End
+
+Process int3_cuadro14(); //jugador2
+Begin
+	write(fnt1,600,220,4,textos[1]);
+	if(ops.p2_personaje==8) ops.p2_personaje=0; end
+	if(ops.p2_personaje==0) players=1; file=0; graph=500; end
+	if(ops.p2_personaje==1) players=3; file=load_fpg(".\fpg\chars1.fpg"); graph=557; end
+	if(ops.p2_personaje==2) players=3; file=load_fpg(".\fpg\chars2.fpg"); graph=557; end
+	if(ops.p2_personaje==3) ops.p2_personaje=5; end
+	if(ops.p2_personaje==5) players=3; file=load_fpg(".\fpg\chars5.fpg"); graph=557; end
+	if(ops.p2_personaje==6) ops.p2_personaje=7; end
+	if(ops.p2_personaje==7) players=3; file=load_fpg(".\fpg\chars7.fpg"); graph=557; end
+	if(modo_juego==3) players=1; file=0; graph=500; end
+	x=600;
+	y=280;
+	if(ops.op_sombras) from size_x=0 to 100 step 3; frame; end else size_x=100; end
+	while(elegido!=-2)
+		if(collision(type ratonera)) if(eligiendo!=1) suena(s9); end eligiendo=1; alpha=255; size_x=140; size_y=140; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>100) size_x-=2; end
+			if(size_y>100) size_y-=2; end
+		end
+		if(collision(type ratonera) and (mouse.left or key(_enter))) 
+			while(mouse.left or key(_enter)) frame; end 
+			ops.p2_personaje++;
+			if(ops.p2_personaje==8) ops.p2_personaje=0; end
+			if(ops.p2_personaje==0) players=1; file=0; graph=500; end
+			if(ops.p2_personaje==1) players=3; file=load_fpg(".\fpg\chars1.fpg"); graph=557; end
+			if(ops.p2_personaje==2) players=3; file=load_fpg(".\fpg\chars2.fpg"); graph=557; end
+			if(ops.p2_personaje==3) ops.p2_personaje=5; end
+			if(ops.p2_personaje==5) players=3; file=load_fpg(".\fpg\chars5.fpg"); graph=557; end
+			if(ops.p2_personaje==6) ops.p2_personaje=7; end
+			if(ops.p2_personaje==7) players=3; file=load_fpg(".\fpg\chars7.fpg"); graph=557; end
+			if(modo_juego==3) players=1; file=0; graph=500; end
+		end
+		frame;	
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	delete_text(all_text);
+	return;
+End
+
+Process int3_cuadro15(); //jugador1
+Begin
+	if(ops.p1_control>2) ops.p1_control=0; end
+	if(ops.p1_control==0) graph=450; end
+	if(ops.p1_control==1) graph=451; end
+	if(ops.p1_control==2) graph=452; end
+	x=200;
+	y=400;
+	if(ops.op_sombras) from size_x=0 to 130 step 5; frame; end else size_x=130; end
+	while(elegido!=-2)
+		if(collision(type ratonera)) if(eligiendo!=3) suena(s9); end eligiendo=3; alpha=255; size_x=180; size_y=180; end
+		if(!collision(type ratonera) and alpha>200)
+			if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+			if(size_x>130) size_x-=2; end
+			if(size_y>130) size_y-=2; end
+		end
+		if(collision(type ratonera) and (mouse.left or key(_enter))) 
+			while(mouse.left or key(_enter)) frame; end 
+			ops.p1_control++;
+//			if(ops.p1_control==ops.p2_control) ops.p1_control++; end
+//			if(ops.p1_control>2) ops.p1_control=0; if(ops.p1_control==ops.p2_control) ops.p1_control++; end end
+			if(ops.p1_control>2) ops.p1_control=0; end
+			if(ops.p1_control==0) graph=450; end
+			if(ops.p1_control==1) graph=451; end
+			if(ops.p1_control==2) graph=452; end
+		end
+		frame;	
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	delete_text(all_text);
+	return;
+End
+
+Process int3_cuadro16(); //jugador2
+Begin
+	if(ops.p2_control==ops.p1_control) ops.p2_control++; end
+	if(ops.p2_control>3) ops.p2_control=0; end
+	if(ops.p2_control==0) graph=450; end
+	if(ops.p2_control==1) graph=451; end
+	if(ops.p2_control==2) graph=452; end
+	if(ops.p2_control==3) graph=453; end
+	x=600;
+	y=400;
+	if(ops.op_sombras) from size_x=0 to 130 step 5; frame; end else size_x=130; end
+	while(elegido!=-2)
+		if(players==3 and ops.p2_personaje!=0)
+			if(collision(type ratonera)) if(eligiendo!=4) suena(s9); end eligiendo=4; alpha=255; size_x=180; size_y=180; end
+			if(!collision(type ratonera) and alpha>200)
+				if(ops.op_sombras) alpha-=2; else alpha=255; size_x=100; size_y=100; end
+				if(size_x>130) size_x-=2; end
+				if(size_y>130) size_y-=2; end
+			end
+			if(collision(type ratonera) and (mouse.left or key(_enter))) 
+				while(mouse.left or key(_enter)) frame; end 
+				ops.p2_control++;
+//				if(ops.p2_control==ops.p1_control) ops.p2_control++; end
+//				if(ops.p2_control>3) ops.p2_control=0; if(ops.p2_control==ops.p1_control) ops.p2_control++; end end
+				if(ops.p2_control>3) ops.p2_control=0; end
+				if(ops.p2_control==0) players=3; graph=450; end
+				if(ops.p2_control==1) players=3; graph=451; end
+				if(ops.p2_control==2) players=3; graph=452; end
+				if(ops.p2_control==3) players=3; graph=453; end
+			end
+			if(ancho==1)
+				ancho=0;
+				if(ops.p2_control==0) players=3; graph=450; end
+				if(ops.p2_control==1) players=3; graph=451; end
+				if(ops.p2_control==2) players=3; graph=452; end
+				if(ops.p2_control==3) players=3; graph=453; end
+			end
+		else
+			ancho=1;
+			graph=0;
+		end
+		frame;	
+	end
+	if(ops.op_sombras) from alpha=255 to 0 step -5; frame; end end
+	delete_text(all_text);
+	return;
+End
+
+/* Menu opciones:
+		Pantalla completa: Si/No
+		Sombras: Si/No
+		Sonidos: Si/No
+		Música: Si/No
+		Musica de CD: Si/No
+		Lenguaje
+		Dificultad
+*/
+
+
+Process int3ops();
+Private
+	testox[10];
+Begin
+	let_me_alone();
+	stop_song();
+	mouse.graph=0;
+	//pantalla completa
+	write(fnt1,50,200,0,textos[61]);
+	//sombras
+	write(fnt1,50,240,0,textos[30]);
+	//sonido
+	write(fnt1,50,280,0,textos[31]);
+	//musica
+	write(fnt1,50,320,0,textos[29]);
+	//musica cd
+	write(fnt1,50,360,0,textos[60]);
+	//lenguaje
+	write(fnt1,50,400,0,textos[62]);
+	//dificultad
+	write(fnt1,50,440,0,textos[63]);
+	write_int(fnt1,600,440,0,&ops.dificultad);
+	//volver
+	write(fnt1,300,480,0,textos[56]);
+	if(ops.ventana==0)
+		testox[2]=write(fnt1,600,200,0,textos[33]);
+	else
+		testox[2]=write(fnt1,600,200,0,textos[34]);
+	end
+	if(ops.op_sombras==1)
+		testox[4]=write(fnt1,600,240,0,textos[33]);
+	else
+		testox[4]=write(fnt1,600,240,0,textos[34]);
+	end
+	if(ops.op_sonido==1)
+		testox[6]=write(fnt1,600,280,0,textos[33]);
+	else
+		testox[6]=write(fnt1,600,280,0,textos[34]);
+	end
+	if(ops.op_music==1)
+		testox[8]=write(fnt1,600,320,0,textos[33]);
+	else
+		testox[8]=write(fnt1,600,320,0,textos[34]);
+	end
+	if(ops.cd_audio==1)
+		testox[10]=write(fnt1,600,360,0,textos[33]);
+	else
+		testox[10]=write(fnt1,600,360,0,textos[34]);
+	end
+	graph=702;
+	eligiendo=1;
+	elegido=0;
+	from size=0 to 100 step 5; frame; end
+	loop
+		y=180+(40*eligiendo);
+		x=25;
+		if(key(_up) and eligiendo>1) while(key(_up)) frame; end eligiendo--; end
+		if(key(_down) and eligiendo<8) while(key(_down)) frame; end eligiendo++; end
+		if(eligiendo==1 and (key(_enter) or key(_left) or key(_right))) 
+			while(key(_enter) or key(_left) or key(_right)) frame; end
+			if(ops.ventana==0) ops.ventana=1; full_screen=0; set_mode(800,600,16); else ops.ventana=0; full_screen=1; set_mode(800,600,16); end
+			delete_text(testox[2]);
+			if(ops.ventana==0)
+				set_text_color(color_texto[0]);	
+				testox[2]=write(fnt1,600,200,0,textos[33]);
+			else
+				set_text_color(color_texto[0]);	
+				testox[2]=write(fnt1,600,200,0,textos[34]);
+			end
+		end
+		if(eligiendo==2 and (key(_enter) or key(_left) or key(_right))) 
+			while(key(_enter) or key(_left) or key(_right)) frame; end
+			if(ops.op_sombras==0) ops.op_sombras=1; else ops.op_sombras=0; end
+			delete_text(testox[4]);
+			if(ops.op_sombras==1)
+				set_text_color(color_texto[0]);	
+				testox[4]=write(fnt1,600,240,0,textos[33]);
+			else
+				set_text_color(color_texto[0]);	
+				testox[4]=write(fnt1,600,240,0,textos[34]);
+			end
+		end
+		if(eligiendo==3 and (key(_enter) or key(_left) or key(_right))) 
+			while(key(_enter) or key(_left) or key(_right)) frame; end
+			if(ops.op_sonido==0) ops.op_sonido=1; else ops.op_sonido=0; end
+			delete_text(testox[6]);
+			if(ops.op_sonido==1)
+				set_text_color(color_texto[0]);	
+				testox[6]=write(fnt1,600,280,0,textos[33]);
+			else
+				set_text_color(color_texto[0]);	
+				testox[6]=write(fnt1,600,280,0,textos[34]);
+			end
+		end
+		if(eligiendo==4 and (key(_enter) or key(_left) or key(_right))) 
+			while(key(_enter) or key(_left) or key(_right)) frame; end
+			if(ops.op_music==0) ops.op_music=1; else ops.op_music=0; end
+			delete_text(testox[8]);
+			if(ops.op_music==1)
+				set_text_color(color_texto[0]);	
+				testox[8]=write(fnt1,600,320,0,textos[33]);
+			else
+				set_text_color(color_texto[0]);	
+				testox[8]=write(fnt1,600,320,0,textos[34]);
+			end
+		end
+		if(eligiendo==5 and (key(_enter) or key(_left) or key(_right))) 
+			while(key(_enter) or key(_left) or key(_right)) frame; end
+			if(ops.cd_audio==0) ops.cd_audio=1; else ops.cd_audio=0; end
+			delete_text(testox[10]);
+			if(ops.cd_audio==1)
+				set_text_color(color_texto[0]);	
+				testox[10]=write(fnt1,600,360,0,textos[33]);
+			else
+				set_text_color(color_texto[0]);	
+				testox[10]=write(fnt1,600,360,0,textos[34]);
+			end
+		end
+		if(eligiendo==6 and key(_enter)) 
+			while(key(_enter)) frame; end
+			let_me_alone();
+			delete_text(all_text);
+			clear_screen();
+			ops.op_lang=-1;
+			id_lang=elige_lenguaje();
+			return;
+		end
+		if(eligiendo==7 and key(_left) or key(_right))
+			if(key(_left) and ops.dificultad>0) ops.dificultad--; end
+			if(key(_right) and ops.dificultad<3) ops.dificultad++; end
+			while(key(_left) or key(_right)) frame; end
+		end
+		if(eligiendo==8 and key(_enter)) 
+			while(key(_enter)) frame; end
+			let_me_alone();
+			delete_text(all_text);
+			titulo();
+			return;
+		end
+		frame;
+	end
+End
+
+Process int3_tutorial();
+Private
+	subids[10];
+Begin
+	musica(10);
+	velocidad=300;
+	modo_juego=2;
+	players=1;
+	ops.p1_personaje=1;
+	ready=0;
+	p1_muere=0;
+	p1_arma=1;
+	ganando=0;
+	dinamita=0;
+	bola_estrella=0;
+	relojarena=0;
+	p1_proteccion=0;
+	prisa=0;
+	raton=0;
+	matabolas=0;
+	delete_text(all_text);
+	timer[9]=0;
+	faderaro(0);
+	While(timer[9]<150) Frame; End
+	p1_disparos[1]=0; p1_disparos[2]=0; // reinicia p1_disparos
+	bolas=0; // indica q no hay bolas en pantalla
+	cheto_diox=1;
+	file_muneco1=load_fpg(".\fpg\chars1.fpg");
+	file_muneco2=load_fpg(".\fpg\chars1.fpg");
+	id_p1=muneco1();
+	anim_global();
+//	marcadores();
+	timer[9]=0;
+	While(key(_enter) OR mouse.middle) Frame; End
+	While(timer[9]<70 AND !key(_enter)) Frame; End
+	iniciando=0;
+	reloj=0;
+	put_screen(0,load_png("cosas/titulo.png"));
+	transicion=0;
+	ready=1;
+	timer[7]=0;
+	frame(3000);
+	write(fnt1,30,30,0,textos[66]);
+	write(fnt3,30,90,0,textos[67]);
+	write(fnt3,30,130,0,textos[68]);
+	loop
+		if(key(_enter)) break; end
+		if(key(_esc)) primerapartida=0; titulo(); delete_text(all_text); return; end
+		frame;
+	end
+	delete_text(all_text);
+	grafico(400,300,1,2,0,0);
+	while(key(_enter)) frame; end
+	write(fnt3,30,30,0,textos[69]);
+	write(fnt3,30,70,0,textos[70]);
+	write(fnt3,30,100,0,textos[71]); //pulsa intro
+	while(!key(_enter)) frame; end
+	delete_text(all_text);
+	while(key(_enter)) frame; end
+	write(fnt3,30,30,0,textos[72]);
+	write(fnt3,30,70,0,textos[73]);
+	write(fnt3,30,100,0,textos[74]);
+	write(fnt3,30,130,0,textos[75]);
+	write(fnt3,30,160,0,textos[76]);
+	while(!key(_enter)) frame; end
+	signal(id_p1,s_kill);
+	delete_text(all_text);
+	while(key(_enter)) frame; end
+	write(fnt3,30,30,0,textos[77]);
+	write(fnt3,30,70,0,textos[78]);
+	write(fnt3,30,100,0,textos[76]);
+	p2_arma=1;
+	id_p2=muneco2();
+	while(!key(_enter)) frame; end
+	signal(id_p2,s_kill);
+	delete_text(all_text);
+	while(key(_enter)) frame; end
+	write(fnt3,30,30,0,textos[79]);
+	write(fnt3,30,70,0,textos[80]);
+	write(fnt3,30,100,0,textos[81]);
+	write(fnt3,30,130,0,textos[82]);
+	write(fnt3,30,160,0,textos[71]);
+	id_p1=muneco1();
+	while(!key(_enter)) frame; end
+	delete_text(all_text);
+	while(key(_enter)) frame; end
+	write(fnt3,30,30,0,textos[83]);
+	write(fnt3,30,70,0,textos[84]);
+	write(fnt3,30,100,0,textos[85]);
+	bola(rand(30,770),200,1,0);
+	itemreloj(3);
+	while(bolas!=0) 
+		if(p1_muere==3) 
+			delete_text(all_text); 
+			musica(8);
+			write(fnt3,30,30,0,textos[86]);
+			frame(30000);
+			write(fnt3,30,70,0,textos[87]);
+			write(fnt3,30,100,0,textos[85]);
+			p1_muere=0;
+			musica(10);
+			id_p1=muneco1(); 	
+			ready=1;
+			itemreloj(3);
+		end
+		frame; 
+	end
+	delete_text(all_text);
+	write(fnt3,30,30,0,textos[88]);
+	ganando=1;
+	frame(10000);
+	write(fnt3,30,70,0,textos[89]);
+	write(fnt3,30,100,0,textos[90]);
+	bola(200,200,5,0);
+	bola(600,200,5,0);
+	itemreloj(2);
+	ganando=0;
+	armap1();
+	while(bolas!=0) 
+		if(p1_muere==3) 
+			delete_text(all_text); 
+			write(fnt3,30,70,0,textos[91]);
+			frame(10000);
+			switch(p1_arma)
+				case 4:
+					delete_text(all_text); 
+					write(fnt3,30,100,0,textos[92]);
+					frame(10000);
+					matabolas=1;
+					p1_arma=4;					
+				end
+				case 2:
+					write(fnt3,30,100,0,textos[93]);
+					frame(10000);
+					p1_arma=4;					
+				end
+				case 1:
+					write(fnt3,30,100,0,textos[94]);
+					frame(10000);
+					p1_arma=2;
+				end
+			end
+			p1_muere=0;
+			if(matabolas==0) write(fnt3,30,130,0,textos[90]); end			id_p1=muneco1(); 	
+			ready=1;
+			itemreloj(5);
+		end
+		frame; 
+	end
+	delete_text(all_text);
+	if(matabolas==0) write(fnt3,30,30,0,textos[95]); end
+	matabolas=0;
+	ganando=1;
+	frame(20000);
+	ready=0;
+	delete_text(all_text);
+	frame;
+	p1_arma=2;
+	write(fnt3,30,70,0,textos[96]);
+	write(fnt3,30,100,0,textos[97]);
+	write(fnt3,30,130,0,textos[71]);
+	bola(150,350,1,1); bola(220,350,6,1); bola(290,350,10,1);
+	bola(360,350,13,1); bola(440,350,17,0); bola(520,350,19,0);
+	bola(600,350,20,0); bola(680,350,21,0);
+	while(!key(_enter)) frame; end
+	ready=1;
+	delete_text(all_text);
+	write(fnt3,30,40,0,textos[98]);
+	ganando=1;
+	frame(50000);
+	delete_text(all_text);	
+	matabolas=1;
+	frame(300);
+	matabolas=0;
+	delete_text(all_text);
+	bola(150,350,1,1);
+	write(fnt3,30,30,0,textos[99]);
+	frame(40000);
+	matabolas=1;
+	frame(300);
+	matabolas=0;
+	delete_text(all_text);
+	write(fnt3,30,30,0,textos[100]);
+	bola(220,350,6,1);
+	frame(40000);
+	matabolas=1;
+	frame(300);
+	matabolas=0;
+	delete_text(all_text);
+	write(fnt3,30,30,0,textos[101]);
+	bola(290,350,10,1);
+	frame(40000);
+	matabolas=1;
+	frame(300);
+	matabolas=0;
+	delete_text(all_text);
+	write(fnt3,30,30,0,textos[102]);
+	bola(360,350,13,1); 
+	frame(40000);
+	matabolas=1;
+	frame(300);
+	matabolas=0;
+	delete_text(all_text);
+	write(fnt3,30,30,0,textos[103]);
+	bola(440,350,17,0);
+	frame(40000);
+	matabolas=1;
+	frame(300);
+	matabolas=0;
+	delete_text(all_text);
+	write(fnt3,30,30,0,textos[104]);
+	bola(520,350,19,0);
+	frame(40000);
+	matabolas=1;
+	frame(300);
+	matabolas=0;
+	delete_text(all_text);
+	write(fnt3,30,30,0,textos[105]);
+	bola(600,350,20,0); 
+	frame(40000);
+	matabolas=1;
+	frame(300);
+	matabolas=0;
+	delete_text(all_text);
+	write(fnt3,30,30,0,textos[106]);
+	write(fnt3,30,70,0,textos[107]);
+	bola(680,350,21,0);
+	frame(40000);
+	matabolas=1;
+	frame(300);
+	matabolas=0;
+	delete_text(all_text);
+	ready=0;
+	write(fnt3,30,70,0,textos[108]);
+	write(fnt3,30,100,0,textos[109]);
+	subids[0]=items(200,350,1); subids[1]=items(240,350,2); subids[2]=items(280,350,3);
+	subids[3]=items(320,350,4); subids[4]=items(360,350,5); subids[5]=items(400,350,6);
+	subids[6]=items(440,350,7); subids[7]=items(480,350,8); subids[8]=items(520,350,9);
+	while(!key(_enter)) frame; end
+	delete_text(all_text);
+	write(fnt3,30,70,0,textos[110]);
+	write(fnt3,30,100,0,textos[71]);
+	while(subids[9]<9)
+		signal(subids[subids[9]],s_kill);
+		subids[9]++;
+		frame;
+	end
+	items(520,350,9);
+	frame(20000);
+	delete_text(all_text);
+	p1_muere=0;
+	ganando=0;	
+	ready=1;
+	write(fnt3,30,70,0,textos[111]);
+	while(exists(type items)) frame; end
+	ready=0;
+	delete_text(all_text);
+	frame;
+	write(fnt3,30,70,0,textos[112]);
+	write(fnt3,30,100,0,textos[113]);
+	write(fnt3,30,130,0,textos[71]);
+	while(!key(_enter)) frame; end
+	delete_text(all_text);
+	write(fnt3,30,70,0,textos[114]);
+	p1_arma=0;
+	ready=1;
+	bola(200,200,5,0);
+	bola(600,200,16,1);
+	cheto_diox=1; 
+	while(bolas>0) 
+		if(p1_estrella==0) estrella(); end
+		frame; 
+	end
+	ready=0;
+	delete_text(all_text);
+	write(fnt3,30,70,0,textos[115]);
+	frame(20000);
+	delete_text(all_text);
+	write(fnt3,30,70,0,textos[116]);
+	write(fnt3,30,100,0,textos[117]);
+	frame(20000);
+	write(fnt3,30,220,0,textos[71]);
+	while(!key(_enter)) frame; end
+	primerapartida=0;
+	p1_estrella=0;
+	p2_estrella=0;
+	cheto_diox=0;
+	cheto_salto=0;
+	cheto_epilepsia=0;
+	let_me_alone();
+	titulo();
+End

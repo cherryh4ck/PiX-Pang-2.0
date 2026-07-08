@@ -1,0 +1,245 @@
+// Jefe gusano por Carles
+
+Process jefe_gusano();
+Private
+
+	id_disp;
+	id_fondo;
+
+	id_partes[10];	//identificadores de las partes
+	a;		//variable auxiliar
+	tiempo;		//tiempo invulnerable
+	v;		//velocidad de movimiento
+	patron;		//IA
+	n;		//variable axiliar
+	angulo;		//angulo de destino
+
+Begin
+	contaor=10;	//vida del jefe
+	vidajefefuera=0;
+	ready=0;
+	x=400;		//coordenadas iniciales
+	y=80;
+	alpha=128;
+	fpg_jefe=load_fpg("fpg/monstruos/gusano.fpg");
+	id_fondo=pon_fondo(load_image("fondos/monstruos/fantasma.jpg"));
+	file=fpg_jefe;
+	vidajefe();
+	from a=1 to 10; id_partes[a]=cola_gusano(a); end	//crea la cola
+	a=10;
+	graph=1;
+	angle=270000;	//mira hacia abajo
+	patron=1;	//iniciamos la ia
+	readyando();
+	while(ready==0) frame; end
+	while(contaor>0)
+		velocidad=400;	//no se que es
+		while(ready==0 or reloj==1) frame; end
+		if(patron==1)	//quieto
+			n++;
+			if(n>300) patron=2; angle=270000; angulo=359000; end 
+		end
+		if(patron==2)	//se mueve en circulo
+			x=250+get_distx(angulo,150);
+			y=80+get_disty(angulo,150);
+			angulo-=1000+100*v;
+			angle=angulo-90000;
+			if(angulo<180000) x=100; y=80; angle=315000; patron=3; n=0; end
+		end
+		if(patron==3)		//quieto
+			n++;
+			if(n>300) patron=4; angle=270000; angulo=180000; end 
+		end
+		if(patron==4)	//se mueve en circulo
+			x=400+get_distx(angulo,300);
+			y=80+get_disty(angulo,300);
+			angulo+=1000+100*v;
+			angle=angulo+90000;
+			if(angulo>358500 and angulo<361000) x=700; y=80; angle=255000; patron=5; n=0; end
+		end
+		if(patron==5)		//quieto
+			n++;
+			if(n>300) patron=6; angle=270000; angulo=359900; end 
+		end
+		if(patron==6)	//se mueve en circulo
+			x=550+get_distx(angulo,150);
+			y=80+get_disty(angulo,150);
+			angulo-=1000+100*v;
+			angle=angulo-90000;
+			if(angulo<180000) x=400; y=80; angle=270000; patron=1; n=0; end
+		end
+		if(angulo>270000)	//dispara cuando esta quieto hacia la derecha
+			if(n==50) bola(x+10,y+10,1,0); end
+			if(n==75) bola(x+10,y+10,1,0); end
+			if(n==100) bola(x+10,y+10,1,0); end
+			if(n==125 and v>2) bola(x+10,y+10,1,0); end
+			if(n==150 and v>5) bola(x+10,y+10,1,0); end
+			if(n==175 and v>8) bola(x+10,y+10,1,0); end
+		end
+		if(angulo<270000)	//dispara cuando esta quieto hacia la izquierda
+			if(n==50) bola(x+10,y+10,1,1); end
+			if(n==75) bola(x+10,y+10,1,1); end
+			if(n==100) bola(x+10,y+10,1,1); end
+			if(n==125 and v>2) bola(x+10,y+10,1,1); end
+			if(n==150 and v>5) bola(x+10,y+10,1,1); end
+			if(n==175 and v>8) bola(x+10,y+10,1,1); end
+		end
+		if(angulo==270000)	//dispara cuando esta quieto
+			if(n==50) bola(x+10,y+10,1,1); end
+			if(n==75) bola(x+10,y+10,1,0); end
+			if(n==100) bola(x+10,y+10,1,1); end
+			if(n==125 and v>2) bola(x+10,y+10,1,0); end
+			if(n==150 and v>5) bola(x+10,y+10,1,1); end
+			if(n==175 and v>8) bola(x+10,y+10,1,0); end
+		end
+
+		if(tiempo<300) alpha=128; tiempo++; else alpha=255; end	//es inbulnerable cuando es transparente
+
+		if(alpha==255)	//colisones
+			If((collision(Type cachodisp) OR collision(Type dispcab)) AND (collision(Type cachodisp2) OR collision(Type dispcab2)))
+				signal(p1_disparos[1],s_kill); p1_disparos[1]=0; signal(p1_disparos[2],s_kill); p1_disparos[2]=0; 
+				If(players==1 OR players==3) p1_bonus+=100; p1_puntos+=500; End
+				contaor--; tiempo=0; v++; bola(id_partes[a].x,id_partes[a].y,7,1); signal(id_partes[a],s_kill); a--;	//quitamos vida, se hace invulnerable, se hace mas rapido, quitamos la cola y creamos una bola(mediana) en su lugar y pasamosal siguiente
+			End
+			If(collision(Type cachodisp) OR collision(Type dispcab) OR collision(Type cachodisp2) OR collision(Type dispcab2))
+				If(p1_arma==4) signal(id_disp,s_kill); End
+				If(collision(Type cachodisp) OR collision(Type dispcab)) signal(p1_disparos[1],s_kill); p1_disparos[1]=0; End
+				If(collision(Type cachodisp2) OR collision(Type dispcab2)) signal(p1_disparos[2],s_kill); p1_disparos[2]=0;  End
+				If(players==1 OR players==3) p1_bonus+=100; p1_puntos+=500; End
+				contaor--; tiempo=0; v++; bola(id_partes[a].x,id_partes[a].y,7,1); signal(id_partes[a],s_kill); a--;	//quitamos vida, se hace invulnerable, se hace mas rapido, quitamos la cola y creamos una bola(mediana) en su lugar y pasamosal siguiente
+			End
+			If((collision(Type cachodisp3) OR collision(Type dispcab3)) AND (collision(Type cachodisp4) OR collision(Type dispcab4)))
+				signal(p2_disparos[1],s_kill); p2_disparos[1]=0; signal(p2_disparos[2],s_kill); p2_disparos[2]=0; 
+				If(players==2 OR players==3) p2_bonus+=100; p2_puntos+=500; End
+				contaor--; tiempo=0; v++; bola(id_partes[a].x,id_partes[a].y,7,1); signal(id_partes[a],s_kill); a--;	//quitamos vida, se hace invulnerable, se hace mas rapido, quitamos la cola y creamos una bola(mediana) en su lugar y pasamosal siguiente
+			End
+			If(collision(Type cachodisp3) OR collision(Type dispcab3) OR collision(Type cachodisp4) OR collision(Type dispcab4))
+				If(p2_arma==4) signal(id_disp,s_kill); End
+				If(collision(Type cachodisp3) OR collision(Type dispcab3)) signal(p2_disparos[1],s_kill); p2_disparos[1]=0; End
+				If(collision(Type cachodisp4) OR collision(Type dispcab4)) signal(p2_disparos[2],s_kill); p2_disparos[2]=0; End
+				If(players==2 OR players==3) p2_bonus+=100; p2_puntos+=500; End
+				contaor--; tiempo=0; v++; bola(id_partes[a].x,id_partes[a].y,7,1); signal(id_partes[a],s_kill); a--;	//quitamos vida, se hace invulnerable, se hace mas rapido, quitamos la cola y creamos una bola(mediana) en su lugar y pasamosal siguiente
+			End
+		end
+		frame;
+	end
+	graph=0;
+	bola(x,y,1,0);	//cuando no tiene mas vida muere y aparece una bola (mediana)
+	while(bolas>0) frame; end	//espera hasta que no hayan bolas y sale
+	jefe=0;
+	vidajefefuera=1;
+	signal(id_fondo,s_kill);
+	if(modo_juego==1) fondos_panic(); end
+	if(modo_juego==2) fondos_tour(); end
+End
+
+Process cola_gusano(a);
+Private
+
+	id_disp;
+
+	espera;		//distancia entre los modulos de la cola
+	v;		//velocidad de movimiento
+	patron;		//IA
+	n;		//variable auxiliar
+	angulo;		//angulo de destino
+
+Begin
+	x=400;		//coordenadas iniciales
+	y=80;
+	z=father.z+a;
+	file=fpg_jefe;
+	graph=2;
+	angle=270000;	//mira hacia abajo
+	patron=0;	//iniciamos la ia
+	while(ready==0) frame; end
+	while(contaor>0)
+		while(espera<a*10) espera++; patron=0;	//deja espacio entre las partes
+		while(ready==0 or reloj==1) frame; end
+		if(espera==a*10) patron=1; end
+		frame;
+		end
+
+		while(ready==0 or reloj==1) frame; end
+		if(patron==1)	//quieto
+			n++;
+			if(n>300) patron=2; angle=270000; angulo=359000; end 
+		end
+		if(patron==2)	//se mueve en circulo
+			x=250+get_distx(angulo,150);
+			y=80+get_disty(angulo,150);
+			angulo-=1000+100*v;
+			angle=angulo-90000;
+			if(angulo<180000) x=100; y=80; angle=315000; patron=3; n=0; end
+		end
+		if(patron==3)		//quieto
+			n++;
+			if(n>300) patron=4; angle=270000; angulo=180000; end 
+		end
+		if(patron==4)	//se mueve en circulo
+			x=400+get_distx(angulo,300);
+			y=80+get_disty(angulo,300);
+			angulo+=1000+100*v;
+			angle=angulo+90000;
+			if(angulo>358500 and angulo<361000) x=700; y=80; angle=255000; patron=5; n=0; end
+		end
+		if(patron==5)		//quieto
+			n++;
+			if(n>300) patron=6; angle=270000; angulo=359900; end 
+		end
+		if(patron==6)	//se mueve en circulo
+			x=550+get_distx(angulo,150);
+			y=80+get_disty(angulo,150);
+			angulo-=1000+100*v;
+			angle=angulo-90000;
+			if(angulo<180000) x=400; y=80; angle=270000; patron=1; n=0; end
+		end
+
+
+		//velocidad de monimiento
+
+		if(contaor==1) v=9; end
+		if(contaor==2) v=8; end
+		if(contaor==3) v=7; end
+		if(contaor==4) v=6; end
+		if(contaor==5) v=5; end
+		if(contaor==6) v=4; end
+		if(contaor==7) v=3; end
+		if(contaor==8) v=2; end
+		if(contaor==9) v=1; end
+		if(contaor==10) v=0; end
+
+
+		//colisones no dan puntos
+
+		If((collision(Type cachodisp) OR collision(Type dispcab)) AND (collision(Type cachodisp2) OR collision(Type dispcab2)))
+			signal(p1_disparos[1],s_kill); p1_disparos[1]=0; signal(p1_disparos[2],s_kill); p1_disparos[2]=0; 
+			If(players==1 OR players==3) End
+
+		End
+		If(collision(Type cachodisp) OR collision(Type dispcab) OR collision(Type cachodisp2) OR collision(Type dispcab2))
+			If(p1_arma==4) signal(id_disp,s_kill); End
+			If(collision(Type cachodisp) OR collision(Type dispcab)) signal(p1_disparos[1],s_kill); p1_disparos[1]=0; End
+			If(collision(Type cachodisp2) OR collision(Type dispcab2)) signal(p1_disparos[2],s_kill); p1_disparos[2]=0;  End
+			If(players==1 OR players==3) End
+
+		End
+		If((collision(Type cachodisp3) OR collision(Type dispcab3)) AND (collision(Type cachodisp4) OR collision(Type dispcab4)))
+			signal(p2_disparos[1],s_kill); p2_disparos[1]=0; signal(p2_disparos[2],s_kill); p2_disparos[2]=0; 
+			If(players==2 OR players==3) End
+
+		End
+		If(collision(Type cachodisp3) OR collision(Type dispcab3) OR collision(Type cachodisp4) OR collision(Type dispcab4))
+			If(p2_arma==4) signal(id_disp,s_kill); End
+			If(collision(Type cachodisp3) OR collision(Type dispcab3)) signal(p2_disparos[1],s_kill); p2_disparos[1]=0; End
+			If(collision(Type cachodisp4) OR collision(Type dispcab4)) signal(p2_disparos[2],s_kill); p2_disparos[2]=0; End
+			If(players==2 OR players==3) End
+
+		End
+
+	frame;
+	end
+	vidajefefuera=1;	
+
+
+End

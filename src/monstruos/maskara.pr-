@@ -1,0 +1,501 @@
+//jefe +kara
+
+Process maskara();
+Private
+
+	id_disp;
+	id_fondo;
+
+	id_manod;	//identificadores de la mano derecha
+	id_manoi;	//identificadores de la mano izquierda
+	tiempo=300;		//tiempo inbulnerable
+	angulo;		//angulo de destino
+	a;		//variable auxiliar
+	x1;
+	y1;
+	id_vidajefe;
+Begin
+	contaor=5;	//vida del jefe
+	vidajefefuera=0;
+	ready=0;
+	x=400;		//coordenadas iniciales
+	y=100;
+	fpg_jefe=load_fpg("fpg/monstruos/maskara.fpg");
+	id_fondo=pon_fondo(load_image("fondos/monstruos/fantasma.jpg"));
+	file=fpg_jefe;
+	vidajefe();
+
+	id_vidajefe=get_id(type vidajefe2);
+	id_vidajefe.graph=graph;
+	id_vidajefe.size=60;
+	alpha=255;
+	angulo=90000;
+	id_manoi=mano(0);
+	id_manod=mano(1);
+	bola(350,200,4,0);
+	bola(450,200,9,1);
+	frame;
+
+	a=ondular(x,y,z,1,file,256,10000,10000);
+
+	from tiempo=0 to 255; a.alpha=tiempo; frame; end
+
+	signal(a,s_kill);
+
+	graph=1;
+	readyando();
+	while(ready==0) frame; end
+	while(contaor>0)
+
+		velocidad=400;	
+
+		id_vidajefe.graph=graph;
+
+		while(ready==0) frame; end
+
+		if(contaor<5) x=400+get_distx(angulo,200); angulo+=1000; a++; end
+		
+		if(contaor==4 and a>400) crea_bola(); a=2; end
+		
+		if(exists(TYPE crea_bola)) a=2; end	
+
+		if(contaor==3 and a>65) bola(x,y+30,1,1);a=2; end
+
+		if(contaor==2 and a>65) bola(x-20,y-10,6,1); bola(x+20,y-10,6,1); a=2; end		
+
+		if(alpha==255)	//colisones
+			If((collision(Type cachodisp) OR collision(Type dispcab)) AND (collision(Type cachodisp2) OR collision(Type dispcab2)))
+				signal(p1_disparos[1],s_kill); p1_disparos[1]=0; signal(p1_disparos[2],s_kill); p1_disparos[2]=0; 
+				If(players==1 OR players==3) p1_bonus+=100; p1_puntos+=500; End
+				contaor--; tiempo=0; trozo(graph,x,y,rand(1,4));//quitamos vida, se hace invulnerable
+			End
+			If(collision(Type cachodisp) OR collision(Type dispcab) OR collision(Type cachodisp2) OR collision(Type dispcab2))
+				If(p1_arma==4) signal(id_disp,s_kill); End
+				If(collision(Type cachodisp) OR collision(Type dispcab)) signal(p1_disparos[1],s_kill); p1_disparos[1]=0; End
+				If(collision(Type cachodisp2) OR collision(Type dispcab2)) signal(p1_disparos[2],s_kill); p1_disparos[2]=0;  End
+				If(players==1 OR players==3) p1_bonus+=100; p1_puntos+=500; End
+				contaor--; tiempo=0; trozo(graph,x,y,rand(1,4));//quitamos vida, se hace invulnerable
+			End
+			If((collision(Type cachodisp3) OR collision(Type dispcab3)) AND (collision(Type cachodisp4) OR collision(Type dispcab4)))
+				signal(p2_disparos[1],s_kill); p2_disparos[1]=0; signal(p2_disparos[2],s_kill); p2_disparos[2]=0; 
+				If(players==2 OR players==3) p2_bonus+=100; p2_puntos+=500; End
+				contaor--; tiempo=0; trozo(graph,x,y,rand(1,4));//quitamos vida, se hace invulnerable
+			End
+			If(collision(Type cachodisp3) OR collision(Type dispcab3) OR collision(Type cachodisp4) OR collision(Type dispcab4))
+				If(p2_arma==4) signal(id_disp,s_kill); End
+				If(collision(Type cachodisp3) OR collision(Type dispcab3)) signal(p2_disparos[1],s_kill); p2_disparos[1]=0; End
+				If(collision(Type cachodisp4) OR collision(Type dispcab4)) signal(p2_disparos[2],s_kill); p2_disparos[2]=0; End
+				If(players==2 OR players==3) p2_bonus+=100; p2_puntos+=500; End
+				contaor--; tiempo=0; trozo(graph,x,y,rand(1,4));//quitamos vida, se hace invulnerable
+			End
+		end
+		while(tiempo<250 and contaor>0)
+
+			If(contaor==4) graph=2; end
+		
+			If(contaor==3) graph=3; end
+		
+			If(contaor==2) graph=4; end
+
+			If(contaor==1) graph=5; end
+
+			if(a>1) a=0; end
+			alpha=128;
+			id_vidajefe.graph=graph;
+			while(ready==0) frame; end
+			if(x<400) x++; end
+			if(x>400) x--; end
+			if(id_manod.x==490 and id_manod.y==250 and id_manoi.x==310 and id_manoi.y==250 and x==400)
+				if(a==0) crea_bola(); a=1; end
+				if(tiempo<250)
+					tiempo++; 
+				end
+			end
+			frame;
+			angulo=90000;
+		end
+		alpha=255;
+		frame;
+	end
+	graph=6;
+	id_vidajefe.graph=graph;
+	x1=x;
+	y1=y;
+	from tiempo=0 to 120;//rompiendose
+		id_vidajefe.graph=graph;
+		x=x1+rand(-10,+10);
+		y=y1+rand(-10,+10);
+		sombra2(graph,x,y,flags);
+		while(ready==0 or reloj==1) frame; end
+		frame;
+	end
+	graph=0;
+	vidajefefuera=1;
+	trozo(7,x1,y1,1);
+	trozo(8,x1,y1,2);
+	trozo(9,x1,y1,3);
+	trozo(10,x1,y1,4);
+	
+	bola(x1-30,y1,1,0);
+	bola(x1-20,y1-15,6,0);
+	bola(x1-20,y1+15,10,0);
+	bola(x1-10,y1-20,13,0);
+	bola(x1-10,y1-10,19,0);
+	bola(x1-10,y1,20,0);
+	bola(x1-10,y1+10,21,0);
+	bola(x1-10,y1+20,22,0);
+	
+	bola(x1+30,y1,1,1);
+	bola(x1+20,y1-15,6,1);
+	bola(x1+20,y1+15,10,1);
+	bola(x1+10,y1-20,13,1);
+	bola(x1+10,y1-10,19,1);
+	bola(x1+10,y1,20,1);
+	bola(x1+10,y1+10,21,1);
+	bola(x1+10,y1+20,22,1);
+
+	while(bolas>0) frame; end	//espera hasta que no hayan bolas y sale
+	jefe=0;
+	signal(id_fondo,s_kill);
+	if(modo_juego==1) fondos_panic(); end
+	if(modo_juego==2) fondos_tour(); end
+End
+
+process mano(lao);
+private
+	id_disp;
+	angulo;
+	tiempo=120;
+	x1;
+	y1;
+	id_bloque;
+begin
+	file=fpg_jefe;
+	graph=11;
+	y=250;
+	if(lao==0)
+		x=300; angle=90000;
+	else
+		flags=1; x=500; angle=-90000;
+	end
+	loop
+
+		if(id_bloque==0) id_bloque=bloques(x,y,0,10); end
+		id_bloque.x=x;
+		id_bloque.y=y;
+		id_bloque.size_x=80;
+		id_bloque.alpha=0;
+		while(ready==0) frame; end
+			if(lao==0)
+				id_bloque.angle=angle+45000;
+			else
+				id_bloque.angle=angle-45000;
+			end
+		
+		if(contaor==4)
+			if(lao==0)
+				x=father.x-100; 
+			else
+				x=father.x+100;
+			end
+		end
+		if(contaor==3)
+			if(lao==0)
+				x=400+get_distx(angulo,200); angulo+=1000;
+				if(y<450) y++; end
+				if(angle<45000) angle+=1000; end
+			else
+				x=400+get_distx(angulo,200); angulo+=1000;
+			end
+		end	
+		if(contaor==2)
+			if(lao==0)
+				x=400+get_distx(angulo,200); angulo+=1000;
+			else
+				x=400+get_distx(angulo,200); angulo+=1000;
+				if(y<450) y++; end
+				if(angle>-45000) angle-=1000; end
+			end
+		end
+		if(contaor==1)
+			if(lao==0)
+				x=400+get_distx(angulo,200); angulo+=1000;
+			else
+				x=400+get_distx(angulo,200); angulo+=1000;
+				if(y<350) y++; end
+			end
+		end	
+		If((collision(Type cachodisp) OR collision(Type dispcab)) AND (collision(Type cachodisp2) OR collision(Type dispcab2)))
+			signal(p1_disparos[1],s_kill); p1_disparos[1]=0; signal(p1_disparos[2],s_kill); p1_disparos[2]=0; 
+			if(contaor<4) tiempo=0; end//paralizado
+		End
+		If(collision(Type cachodisp) OR collision(Type dispcab) OR collision(Type cachodisp2) OR collision(Type dispcab2))
+			If(p1_arma==4) signal(id_disp,s_kill); End
+			If(collision(Type cachodisp) OR collision(Type dispcab)) signal(p1_disparos[1],s_kill); p1_disparos[1]=0; End
+			If(collision(Type cachodisp2) OR collision(Type dispcab2)) signal(p1_disparos[2],s_kill); p1_disparos[2]=0;  End
+			if(contaor<4) tiempo=0; end//paralizado
+		End
+		If((collision(Type cachodisp3) OR collision(Type dispcab3)) AND (collision(Type cachodisp4) OR collision(Type dispcab4)))
+			signal(p2_disparos[1],s_kill); p2_disparos[1]=0; signal(p2_disparos[2],s_kill); p2_disparos[2]=0; 
+			if(contaor<4) tiempo=0; end//paralizado
+		End
+			If(collision(Type cachodisp3) OR collision(Type dispcab3) OR collision(Type cachodisp4) OR collision(Type dispcab4))
+			If(p2_arma==4) signal(id_disp,s_kill); End
+			If(collision(Type cachodisp3) OR collision(Type dispcab3)) signal(p2_disparos[1],s_kill); p2_disparos[1]=0; End
+			If(collision(Type cachodisp4) OR collision(Type dispcab4)) signal(p2_disparos[2],s_kill); p2_disparos[2]=0; End
+			if(contaor<4) tiempo=0; end//paralizado
+		End
+		x1=x;
+		y1=y;
+
+		if(collision(type muneco1))
+			if(x>id_p1.x) id_p1.x-=5; else id_p1.x+=5; end
+		end
+		if(collision(type muneco2))
+			if(x>id_p2.x) id_p2.x-=5; else id_p2.x+=5; end
+		end
+
+		while(tiempo<120)
+			while(ready==0) frame; end
+			tiempo++;
+			x=x1+rand(-5,+5);
+			y=y1+rand(-5,+5);
+			If((collision(Type cachodisp) OR collision(Type dispcab)) AND (collision(Type cachodisp2) OR collision(Type dispcab2)))
+				signal(p1_disparos[1],s_kill); p1_disparos[1]=0; signal(p1_disparos[2],s_kill); p1_disparos[2]=0; 
+			End
+			If(collision(Type cachodisp) OR collision(Type dispcab) OR collision(Type cachodisp2) OR collision(Type dispcab2))
+				If(p1_arma==4) signal(id_disp,s_kill); End
+				If(collision(Type cachodisp) OR collision(Type dispcab)) signal(p1_disparos[1],s_kill); p1_disparos[1]=0; End
+				If(collision(Type cachodisp2) OR collision(Type dispcab2)) signal(p1_disparos[2],s_kill); p1_disparos[2]=0;  End
+			End
+			If((collision(Type cachodisp3) OR collision(Type dispcab3)) AND (collision(Type cachodisp4) OR collision(Type dispcab4)))
+				signal(p2_disparos[1],s_kill); p2_disparos[1]=0; signal(p2_disparos[2],s_kill); p2_disparos[2]=0; 
+			End
+				If(collision(Type cachodisp3) OR collision(Type dispcab3) OR collision(Type cachodisp4) OR collision(Type dispcab4))
+				If(p2_arma==4) signal(id_disp,s_kill); End
+				If(collision(Type cachodisp3) OR collision(Type dispcab3)) signal(p2_disparos[1],s_kill); p2_disparos[1]=0; End
+				If(collision(Type cachodisp4) OR collision(Type dispcab4)) signal(p2_disparos[2],s_kill); p2_disparos[2]=0; End
+			End
+			if(father.alpha==128) tiempo=120; break; end
+			id_bloque.x=x;
+			id_bloque.y=y;
+			if(lao==0)
+				id_bloque.angle=angle+45000;
+			else
+				id_bloque.angle=angle-45000;
+			end
+			frame;
+		end
+		
+		while(father.alpha==128 and contaor>0)
+			while(ready==0) frame; end
+			If((collision(Type cachodisp) OR collision(Type dispcab)) AND (collision(Type cachodisp2) OR collision(Type dispcab2)))
+				signal(p1_disparos[1],s_kill); p1_disparos[1]=0; signal(p1_disparos[2],s_kill); p1_disparos[2]=0; 
+			End
+			If(collision(Type cachodisp) OR collision(Type dispcab) OR collision(Type cachodisp2) OR collision(Type dispcab2))
+				If(p1_arma==4) signal(id_disp,s_kill); End
+				If(collision(Type cachodisp) OR collision(Type dispcab)) signal(p1_disparos[1],s_kill); p1_disparos[1]=0; End
+				If(collision(Type cachodisp2) OR collision(Type dispcab2)) signal(p1_disparos[2],s_kill); p1_disparos[2]=0;  End
+			End
+			If((collision(Type cachodisp3) OR collision(Type dispcab3)) AND (collision(Type cachodisp4) OR collision(Type dispcab4)))
+				signal(p2_disparos[1],s_kill); p2_disparos[1]=0; signal(p2_disparos[2],s_kill); p2_disparos[2]=0; 
+			End
+				If(collision(Type cachodisp3) OR collision(Type dispcab3) OR collision(Type cachodisp4) OR collision(Type dispcab4))
+				If(p2_arma==4) signal(id_disp,s_kill); End
+				If(collision(Type cachodisp3) OR collision(Type dispcab3)) signal(p2_disparos[1],s_kill); p2_disparos[1]=0; End
+				If(collision(Type cachodisp4) OR collision(Type dispcab4)) signal(p2_disparos[2],s_kill); p2_disparos[2]=0; End
+			End
+			if(y<250) y++; end
+			if(y>250) y--; end
+			if(angle<0) angle+=1000; end
+			if(angle>0) angle-=1000; end
+			if(lao==0)
+				if(x<310) x++; end
+				if(x>310) x--; end
+			else
+				if(x<490) x++; end
+				if(x>490) x--; end
+			end
+			frame;
+			angulo=90000;
+			id_bloque.x=x;
+			id_bloque.y=y;
+			if(lao==0)
+				id_bloque.angle=angle+45000;
+			else
+				id_bloque.angle=angle-45000;
+			end	
+		end
+		if(contaor==0) trozo(graph,x,y,lao+2); signal(id_bloque,s_kill); break; end
+		frame;
+	end
+end
+
+process crea_bola()
+private
+	id_disp;
+
+begin
+	y=250;
+	x=400;
+	if(contaor==4)
+		graph=715;
+			from alpha=0 to 255;
+				while(ready==0) frame; end
+				If((collision(Type cachodisp) OR collision(Type dispcab)) AND (collision(Type cachodisp2) OR collision(Type dispcab2)))
+					signal(p1_disparos[1],s_kill); p1_disparos[1]=0; signal(p1_disparos[2],s_kill); p1_disparos[2]=0; 
+				End
+				If(collision(Type cachodisp) OR collision(Type dispcab) OR collision(Type cachodisp2) OR collision(Type dispcab2))
+					If(p1_arma==4) signal(id_disp,s_kill); End
+					If(collision(Type cachodisp) OR collision(Type dispcab)) signal(p1_disparos[1],s_kill); p1_disparos[1]=0; End
+					If(collision(Type cachodisp2) OR collision(Type dispcab2)) signal(p1_disparos[2],s_kill); p1_disparos[2]=0;  End
+				End
+				If((collision(Type cachodisp3) OR collision(Type dispcab3)) AND (collision(Type cachodisp4) OR collision(Type dispcab4)))
+					signal(p2_disparos[1],s_kill); p2_disparos[1]=0; signal(p2_disparos[2],s_kill); p2_disparos[2]=0; 
+				End
+					If(collision(Type cachodisp3) OR collision(Type dispcab3) OR collision(Type cachodisp4) OR collision(Type dispcab4))
+					If(p2_arma==4) signal(id_disp,s_kill); End
+					If(collision(Type cachodisp3) OR collision(Type dispcab3)) signal(p2_disparos[1],s_kill); p2_disparos[1]=0; End
+					If(collision(Type cachodisp4) OR collision(Type dispcab4)) signal(p2_disparos[2],s_kill); p2_disparos[2]=0; End
+				End
+				x=father.x;
+				if(contaor==3)
+					signal(id,s_kill);
+				end
+				frame; 
+			end
+		bola(father.x,250,8,1);
+	end
+	if(contaor==3)
+		graph=801;
+			from alpha=0 to 255;
+			while(ready==0) frame; end
+				If((collision(Type cachodisp) OR collision(Type dispcab)) AND (collision(Type cachodisp2) OR collision(Type dispcab2)))
+					signal(p1_disparos[1],s_kill); p1_disparos[1]=0; signal(p1_disparos[2],s_kill); p1_disparos[2]=0; 
+				End
+				If(collision(Type cachodisp) OR collision(Type dispcab) OR collision(Type cachodisp2) OR collision(Type dispcab2))
+					If(p1_arma==4) signal(id_disp,s_kill); End
+					If(collision(Type cachodisp) OR collision(Type dispcab)) signal(p1_disparos[1],s_kill); p1_disparos[1]=0; End
+					If(collision(Type cachodisp2) OR collision(Type dispcab2)) signal(p1_disparos[2],s_kill); p1_disparos[2]=0;  End
+				End
+				If((collision(Type cachodisp3) OR collision(Type dispcab3)) AND (collision(Type cachodisp4) OR collision(Type dispcab4)))
+					signal(p2_disparos[1],s_kill); p2_disparos[1]=0; signal(p2_disparos[2],s_kill); p2_disparos[2]=0; 
+				End
+					If(collision(Type cachodisp3) OR collision(Type dispcab3) OR collision(Type cachodisp4) OR collision(Type dispcab4))
+					If(p2_arma==4) signal(id_disp,s_kill); End
+					If(collision(Type cachodisp3) OR collision(Type dispcab3)) signal(p2_disparos[1],s_kill); p2_disparos[1]=0; End
+					If(collision(Type cachodisp4) OR collision(Type dispcab4)) signal(p2_disparos[2],s_kill); p2_disparos[2]=0; End
+				End
+				frame;
+			end
+		bola(400,250,12,1); end
+	if(contaor==2)
+		graph=703;
+			from alpha=0 to 255;
+				while(ready==0) frame; end
+				If((collision(Type cachodisp) OR collision(Type dispcab)) AND (collision(Type cachodisp2) OR collision(Type dispcab2)))
+					signal(p1_disparos[1],s_kill); p1_disparos[1]=0; signal(p1_disparos[2],s_kill); p1_disparos[2]=0; 
+				End
+				If(collision(Type cachodisp) OR collision(Type dispcab) OR collision(Type cachodisp2) OR collision(Type dispcab2))
+					If(p1_arma==4) signal(id_disp,s_kill); End
+					If(collision(Type cachodisp) OR collision(Type dispcab)) signal(p1_disparos[1],s_kill); p1_disparos[1]=0; End
+					If(collision(Type cachodisp2) OR collision(Type dispcab2)) signal(p1_disparos[2],s_kill); p1_disparos[2]=0;  End
+				End
+				If((collision(Type cachodisp3) OR collision(Type dispcab3)) AND (collision(Type cachodisp4) OR collision(Type dispcab4)))
+					signal(p2_disparos[1],s_kill); p2_disparos[1]=0; signal(p2_disparos[2],s_kill); p2_disparos[2]=0; 
+				End
+					If(collision(Type cachodisp3) OR collision(Type dispcab3) OR collision(Type cachodisp4) OR collision(Type dispcab4))
+					If(p2_arma==4) signal(id_disp,s_kill); End
+					If(collision(Type cachodisp3) OR collision(Type dispcab3)) signal(p2_disparos[1],s_kill); p2_disparos[1]=0; End
+					If(collision(Type cachodisp4) OR collision(Type dispcab4)) signal(p2_disparos[2],s_kill); p2_disparos[2]=0; End
+				End
+				frame;
+			end	
+		bola(400,250,3,1); end
+	if(contaor==1)
+		graph=704;
+			from alpha=0 to 255;
+				while(ready==0) frame; end
+				If((collision(Type cachodisp) OR collision(Type dispcab)) AND (collision(Type cachodisp2) OR collision(Type dispcab2)))
+					signal(p1_disparos[1],s_kill); p1_disparos[1]=0; signal(p1_disparos[2],s_kill); p1_disparos[2]=0; 
+				End
+				If(collision(Type cachodisp) OR collision(Type dispcab) OR collision(Type cachodisp2) OR collision(Type dispcab2))
+					If(p1_arma==4) signal(id_disp,s_kill); End
+					If(collision(Type cachodisp) OR collision(Type dispcab)) signal(p1_disparos[1],s_kill); p1_disparos[1]=0; End
+					If(collision(Type cachodisp2) OR collision(Type dispcab2)) signal(p1_disparos[2],s_kill); p1_disparos[2]=0;  End
+				End
+				If((collision(Type cachodisp3) OR collision(Type dispcab3)) AND (collision(Type cachodisp4) OR collision(Type dispcab4)))
+					signal(p2_disparos[1],s_kill); p2_disparos[1]=0; signal(p2_disparos[2],s_kill); p2_disparos[2]=0; 
+				End
+					If(collision(Type cachodisp3) OR collision(Type dispcab3) OR collision(Type cachodisp4) OR collision(Type dispcab4))
+					If(p2_arma==4) signal(id_disp,s_kill); End
+					If(collision(Type cachodisp3) OR collision(Type dispcab3)) signal(p2_disparos[1],s_kill); p2_disparos[1]=0; End
+					If(collision(Type cachodisp4) OR collision(Type dispcab4)) signal(p2_disparos[2],s_kill); p2_disparos[2]=0; End
+				End
+				frame;
+			end	
+		bola(400,250,4,1); end
+	
+	frame;
+end
+
+Process trozo(graph,x,y,direccion);
+private
+velocidadtrozo;
+
+begin
+	file=fpg_jefe;
+	if(direccion==1 or direccion==4)
+		velocidadtrozo=-20;
+	end
+	alpha=128;
+	while(y<650)
+		if(direccion==1)
+			x+=6;
+			y+=velocidadtrozo/4;
+		end
+		if(direccion==2)
+			x+=6;
+			y+=velocidadtrozo/4;
+		end
+		if(direccion==3)
+			x-=6;
+			y+=velocidadtrozo/4;
+		end
+		if(direccion==4)
+			x-=6;
+			y+=velocidadtrozo/4;
+		end
+		if(direccion<3) angle-=20000; else angle+=20000; end
+		velocidadtrozo++;
+		sombra2(graph,x,y,flags);
+		while(ready==0 or reloj==1) frame; end
+		frame;
+	end
+end
+
+process ondular(x,y,z,grafico,file,radio,omega,delta);
+
+private
+	angulo;
+	altura;
+	desfase;
+begin
+
+	loop
+		graph=new_map(radio*2+graphic_info(file,grafico,g_wide),graphic_info(file,grafico,g_height),16);
+
+		angulo=desfase;
+		from altura=0 to graphic_info(0,grafico,g_height);
+			map_block_copy(file,graph,radio+get_distx(angulo,radio),altura,grafico,0,altura,graphic_info(0,grafico,g_wide),1,128);
+			angulo+=omega;
+		end
+		desfase+=delta;
+		if(radio>1) radio--; end
+		if(angulo>360000) angulo=0; end
+		if(desfase>360000) desfase=0; end
+		frame;
+		unload_map(0,graph);
+	end
+end
+

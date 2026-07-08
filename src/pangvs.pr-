@@ -1,0 +1,423 @@
+Process mode_vs();
+Private
+	opcion;
+Begin
+	// cerramos sockets por si en una ejecucion anterior no se cerro el programa 	adecuadamente
+	// y asi evitar petadas de sdl_net
+	for  (i=0;i<=jugadores;i++);
+	net_udp_close(i);
+	end;
+	write(0,5,5,0,"Selecciona una opcion:");
+	write(0,5,25,0,"1. Crear servidor");
+	write(0,5,35,0,"2. Unirse a partida");
+	while (Opcion==0 and Jugadores>1)
+		if (key(_1)) opcion=1; vs_mode_servidor(); end
+		if (key(_2)) opcion=1; vs_mode_cliente(); end
+		if (key(_esc)) titulo(); end
+		frame;
+	end
+End
+
+// Proceso del servidor
+PROCESS vs_mode_servidor()
+private    
+	i, j, conectados, texto[3]; // bucles for i,j
+	anim;
+	ratangle;
+	parpadeas;
+	grav;
+	distancia;
+	huevo;
+oservidor;
+begin
+	oservidor=1;// para evitar variaciones imprevistas de opcion
+	// Inicio del servidor
+	write(0,10,10,3,"Servidor");
+	texto[0]=write(0,10,25,3,"Jugadores conectados:");
+	texto[1]=write_int(0,160,25,3,offset conectados);
+	texto[2]=write(0,10,40,3,"Esperando conexión de "+ (jugadores-1) +" jugadores...");
+	
+	net_init(); // inicializamos funciones de red
+	
+	for (i=0;i<=jugadores;i++)
+	net_udp_allocpacket(i,50); // iniciamos los paquetes para envio y recibo de datos
+	end;
+	net_udp_open(0,16660); // abrimos el socket 0 para escucha en el puerto 16660
+	net_udp_bind(0,1,"127.0.0.1",16660); // "bindeamos" el socket 0 con el canal 1 en el puerto de escucha
+	
+	// Esperamos a que se conecten jugadores
+	p=net_udp_getpacket(0);
+	while (conectados<jugadores-1)
+		if (net_udp_recv(0,0)>0)
+		q=p; // con ello conseguimos el host y port del cliente seleccionado
+		net_udp_open(conectados+1,0); // abrimos el socket i+1 en el puerto 0 para enviar datos a dicho cliente
+		net_udp_bind2(conectados+1,1,q.address.host,16662+conectados); // "bindeamos" el socket i con el canal 1 al puerto 16662+i-1 y direccion del cliente
+		conectados=conectados+1; // incrementamos numero de conectados
+		end;
+		frame;
+	end;
+	
+	if (oservidor<1 and texto[3]>0) delete_Text(texto[3]);end
+	delete_text(texto[0]);delete_text(texto[1]);delete_text(texto[2]);
+	write(0,10,25,3,"Nº de jugador: 0");// El servidor siempre es el jugador 0
+	
+	// Una vez conectados les enviamos su número de jugador
+	for (i=1;i<=jugadores-1;i++)
+	memcopy(p.data,&i,50);
+	net_udp_send(i,1,0);
+	frame;
+	end;
+	
+	// Grafico del avion y posicion aleatoria
+//	repeat
+	//..
+		//aki se mete lo q se necesite enviar, ok?
+		//int x,int y,int graph,int shoot,int h_x,int h_y, int h_angle;
+		//x=keko.x;
+		//y=keko.y;
+		//graph=keko.graph;
+		//shoot=p1_disparos[1];
+	repeat
+		if(key(_esc)) logos(); ready=0; end
+		while(ganando==1)
+			graph=507;
+			frame;
+			end
+		while(ready==0)
+			frame;
+			end
+		if(y=<461)
+			grav-=5;
+			y-=grav/10;
+			mouse.y-=grav/10;
+			if(ops.op_sombras==1) sombra(graph,x,y,flags,1); end
+		else
+			y=462;
+			grav=0;
+			timer[4]=0; 
+		end
+		if((key(_a) or key(_left)) and x>80) x-=4; mouse.x-=4; end
+		if((key(_s) or key(_down)) and mouse.y<500) mouse.y+=10; end
+		if((key(_w) or key(_up)) and mouse.y>18) mouse.y-=10; end
+		if((key(_d) or key(_right)) and x<500) x+=4; mouse.x+=4; end
+		ratangle=FGET_ANGLE(x,y,mouse.x,mouse.y);
+		distancia=get_dist(raton)/32;
+		if(mouse.left and p1_disparos[0]==0) p1_disparos[0]=disp_saf(ratangle,distancia); end
+		if(mouse.right and y==462) grav=120; y--; end
+		if(mouse.x<x) flags=1; else flags=0; end
+		if(x<80) x+=2; end
+		if(anim<11)
+			anim++;
+		else
+			anim=0;
+		end
+		if(graph<506 and anim>10) 
+			graph++; 
+		end
+		if(graph==506) 
+			graph=502;
+		end
+		if(muere==1) 
+			suena(s4);
+			grav=rand(50,250);
+			while(y<480)
+				if(ops.op_sombras==1) sombra(graph,x,y,flags,1); end
+				if(flags==0) x+=12; end
+				if(flags==1) x-=12; end
+				if(x=>755) flags=1; end
+				if(x=<45) flags=0; end
+				if(grav>0) graph=508; end 
+				if(grav<0) graph=509; end 
+				grav-=5;
+				y-=grav/10;
+				frame;
+			end
+			suena(s5);
+			muere=3;
+			p1_vidas--;
+			x=-30;
+			y=462;
+			graph=502;
+			z=-1;
+		end
+		frame;
+//	end
+	// Bloque de envio y recepcion de datos
+//	for (i=1;i<=jugadores-1;i++);
+	// envio de las coordenadas del servidor al cliente i
+		//int x,int y,int graph,int shoot,int h_x,int h_y, int h_angle, int fuerza;
+	playerdata.x=x;
+	playerdata.y=y;
+	playerdata.graph=graph;
+	playerdata.h_x=p1_disparos[1].x;
+	playerdata.h_y=p1_disparos[1].y;
+	playerdata.shoot=p1_disparos[1];
+	playerdata.h_angle=p1_disparos[1].angle/1000; // Lo dividimos con el fin de enviar menos bytes, angulos se miden en milesimas de grados
+	playerdata.fuerza=distancia;
+	if (key(_esc)) graph=-1;end;
+	p=net_udp_getpacket(0);
+	p.len=50;// longitud 50 del paquete de datos a enviar el servidor
+	memcopy(p.data,&playerdata,50);
+	net_udp_send(i,1,0);
+		if (playerdata.shoot>1) disparando=2;end // Para evitar que salgan constantemente disparos en el receptor
+	// si recibimos coordenadas del dato i, mostramos su avion (disparo, explosion, etc) y dicha info la enviamos a los demas clientes
+	p=net_udp_getpacket(i);
+		if (net_udp_recv(0,i)>0)
+		memcopy(&playerdata,p.data,50);
+			// el siguiente bucle "for" forma en la variable 'string nick' el nick/alias del cliente i mediante el código ascii de los caracteres
+			nick="";
+			for (j=0;j<=7;j++);
+			// Si recibimos que graph=-1 es que el jugador correspondiente ha desconectado
+			if (playerdata.graph==-1) write(0,5,25+(i*10),0,"El jugador "+i+" ("+nick+") ha desconectado");end
+		vs_yoshi(playerdata.x,playerdata.y,playerdata.graph);
+		if(p1_disparos[2]==0 and disparando==1) p1_disparos[2]=vs_huevo(playerdata.x,playerdata.y,playerdata.h_angle,playerdata.fuerza); end
+		p.len=50;// longitud 50 del paquete de datos a enviar el servidor
+		memcopy(p.data,&playerdata,50);
+			for (j=1;j<=jugadores-1;j++)
+				if (j!=i) // condicion para no enviar las coordenadas a un cliente que nos ha enviado estas coordenadas
+				net_udp_send(j,1,i);
+				end;
+			end;
+		end;
+	end;
+
+	frame;
+ 	until (graph==-1) // Si graph=-1 es que hemos pulsado escape y hemos finalizado el programa
+	for(i=0;i<=jugadores;i++);
+	net_udp_freepacket(i); // vaciamos paquetes y cerramos sockets y funciones
+	net_udp_close(i);
+	end;
+	net_quit();
+end
+
+// Proceso del cliente
+PROCESS vs_mode_cliente()
+private 
+i,j,texto,jugador;// bucle for i,j, variable jugador para identificarnos
+no_se_que_jugador_soy; // para saber cuando hemos recibido numero de jugador
+string nombreservidor;
+int entry2; // en el caso de que la ip esté dada en un entero en vez de string
+ocliente;
+	anim;
+	ratangle;
+	parpadeas;
+	grav;
+	distancia;
+	huevo;
+begin
+	entry="127.0.0.1";
+	ocliente=5;// para evitar variaciones imprevistas de opcion
+	net_init();// inicializamos funciones de red
+	// Si opcion=7 es que hemos seleccionado elegir un servidor de los que estan autentificados en un servidor maestro
+	for (i=0;i<=jugadores;i++)
+	net_udp_allocpacket(i,50); // iniciamos los paquetes para envio y recibo de datos
+	end;
+	p=net_udp_getpacket(0);  // puntero al paquete 0
+	// Inicio del cliente
+	net_udp_open(0,0); // abrimos el socket 0 en puerto el 0
+ 	if (ocliente<>8)
+	net_udp_bind(0,1,entry,16660); // "bindeamos" el socket 0 con el canal 1 a la direccion del server en el puerto 16660
+	else
+	net_udp_close(101);
+	delete_Text(0);
+	net_udp_bind2(0,1,entry2,16660); // "bindeamos" el socket 0 con el canal 1 a la direccion del server en el puerto 16660
+	end;
+	p.len=50; // longitud 50 del paquete de datos a enviar el servidor
+	write(0,10,10,3,"Cliente");
+	texto=write(0,10,25,3,"Conectado! Esperando a los otros jugadores...");
+	memcopy(p.data,&i,50); // enviamos i (da igual su valor) para indicar que hemos conectado con el servidor
+	net_udp_send(0,1,0);
+	
+	// Como no sabemos a que puerto y socket el servidor va a enviar todavia la info, abrimos todos los puertos y sockets posibles
+	for (i=1;i=<jugadores-1;i++)
+	net_udp_open(i,16662+i-1);
+ 	net_udp_bind(i,1,"127.0.0.1",16662+i-1); 
+	end;
+	
+	// Con lo siguiente esperamos a recibir el dato para saber que jugador somos y que socket y puerto hemos de abrir
+	i=1;
+	while (no_se_que_jugador_soy==0)
+                if (net_udp_recv(i,0)>0)
+		memcopy(&jugador,p.data,50);
+		delete_text(texto);
+		no_se_que_jugador_soy=1;
+		texto=write(0,10,25,3,"Nº de jugador: "+ jugador);
+			// el siguiente bucle "for" almacena en la estructura playerdata el nick/alias del cliente mediante el código ascii de los caracteres
+			for  (i=1;i<=jugadores;i++)
+			net_udp_close(i);// cerramos sockets anteriores
+			end;
+		net_udp_open(jugador,16662+jugador-1); // abrimos socket jugador en puerto 16662+jugador-1
+		net_udp_bind(jugador,1,"127.0.0.1",16662+jugador-1); // "bindeamos" el socket jugador con el canal 1 para escucha en el puerto 16662+jugador-1
+		end;
+		if (i<jugadores-1) i=i+1;else i=1;end
+	frame;
+	end;
+	
+//	repeat
+	//..
+		//aki se mete lo q se necesite enviar, ok?
+		//int x,int y,int graph,int shoot,int h_x,int h_y, int h_angle;
+		//x=keko.x;
+		//y=keko.y;
+		//graph=keko.graph;
+		//shoot=p1_disparos[1];
+	raton=puntero_raton();
+	repeat
+		if(key(_esc)) logos(); ready=0; end
+		while(ganando==1)
+			graph=507;
+			frame;
+			end
+		while(ready==0)
+			frame;
+			end
+		if(y=<461)
+			grav-=5;
+			y-=grav/10;
+			mouse.y-=grav/10;
+			if(ops.op_sombras==1) sombra(graph,x,y,flags,1); end
+		else
+			y=462;
+			grav=0;
+			timer[4]=0; 
+		end
+		if((key(_a) or key(_left)) and x>80) x-=4; mouse.x-=4; end
+		if((key(_s) or key(_down)) and mouse.y<500) mouse.y+=10; end
+		if((key(_w) or key(_up)) and mouse.y>18) mouse.y-=10; end
+		if((key(_d) or key(_right)) and x<500) x+=4; mouse.x+=4; end
+		ratangle=FGET_ANGLE(x,y,mouse.x,mouse.y);
+		distancia=get_dist(raton)/32;
+		if(mouse.left and p1_disparos[0]==0) p1_disparos[0]=disp_saf(ratangle,distancia); end
+		if(mouse.right and y==462) grav=120; y--; end
+		if(mouse.x<x) flags=1; else flags=0; end
+		if(x<80) x+=2; end
+		if(anim<11)
+			anim++;
+		else
+			anim=0;
+		end
+		if(graph<506 and anim>10) 
+			graph++; 
+		end
+		if(graph==506) 
+			graph=502;
+		end
+		if(muere==1) 
+			suena(s4);
+			grav=rand(50,250);
+			while(y<480)
+				if(ops.op_sombras==1) sombra(graph,x,y,flags,1); end
+				if(flags==0) x+=12; end
+				if(flags==1) x-=12; end
+				if(x=>755) flags=1; end
+				if(x=<45) flags=0; end
+				if(grav>0) graph=508; end 
+				if(grav<0) graph=509; end 
+				grav-=5;
+				y-=grav/10;
+				frame;
+			end
+			suena(s5);
+			muere=3;
+			p1_vidas--;
+			x=-30;
+			y=462;
+			graph=502;
+			z=-1;
+		end
+		frame;
+//	end
+	// Bloque de envio y recepcion de datos
+//	for (i=1;i<=jugadores-1;i++);
+	// envio de las coordenadas del servidor al cliente i
+		//int x,int y,int graph,int shoot,int h_x,int h_y, int h_angle, int fuerza;
+	playerdata.x=x;
+	playerdata.y=y;
+	playerdata.graph=graph;
+	playerdata.h_x=p1_disparos[1].x;
+	playerdata.h_y=p1_disparos[1].y;
+	playerdata.shoot=p1_disparos[1];
+	playerdata.h_angle=p1_disparos[1].angle/1000; // Lo dividimos con el fin de enviar menos bytes, angulos se miden en milesimas de grados
+	playerdata.fuerza=distancia;
+	if (key(_esc)) graph=-1;end;
+	// el siguiente bucle "for" almacena en la estructura playerdata el nick/alias del cliente mediante el código ascii de los caracteres
+	p=net_udp_getpacket(jugador);  // puntero al paquete jugador
+	p.len=50; // longitud 50 del paquete de datos a enviar el servidor
+	memcopy(p.data,&playerdata,50);
+	net_udp_send(0,1,jugador);
+	if (playerdata.shoot==1) disparando=2;end
+	// recibimos coordenadas del servidor y mostramos su avion (disparos, explosiones, etc)
+	p=net_udp_getpacket(0);
+	net_udp_recv(jugador,0);
+	memcopy(&playerdata,p.data,50);
+	// el siguiente bucle "for" forma en la variable 'string nick' el nick/alias del servidor mediante el código ascii de los caracteres
+	nick="";
+	for (i=0;i<=7;i++);
+	end
+	// Si recibimos que graph=-1 es que el servidor ha desconectado
+	if (playerdata.graph==-1) write(0,5,35,0,"El servidor ("+nick+") ha desconectado");end
+		vs_yoshi(playerdata.x,playerdata.y,playerdata.graph);
+		if(p1_disparos[2]==0 and disparando==1) p1_disparos[2]=vs_huevo(playerdata.x,playerdata.y,playerdata.h_angle,playerdata.fuerza); end
+	// recibimos del servidor la informacion de los aviones de los clientes y los mostramos
+		for (i=1;i<=jugadores-1;i++)
+			if (i!=jugador)
+			p=net_udp_getpacket(i);  // puntero al paquete i
+			net_udp_recv(jugador,i);
+			memcopy(&playerdata,p.data,50);nick="";
+			// el siguiente bucle "for" forma en la variable 'string nick' el nick/alias del cliente i mediante el código ascii de los caracteres
+			nick="";
+			for (j=0;i<=7;j++);
+			end
+			// Si recibimos que graph=-1 es que el jugador correspondiente ha desconectado
+			if (playerdata.graph==-1) write(0,5,25+(i*10),0,"El jugador "+i+" ("+nick+") ha desconectado");end
+			vs_yoshi(playerdata.x,playerdata.y,playerdata.graph);
+			if(p1_disparos[2]==0 and disparando==1) p1_disparos[2]=vs_huevo(playerdata.x,playerdata.y,playerdata.h_angle,playerdata.fuerza); end
+			end;
+		end;
+	frame;
+	until (graph==-1) // Si graph=-1 es que hemos pulsado escape y hemos finalizado el programa
+ 	for  (i=0;i<=jugadores;i++);
+	net_udp_freepacket(i); // vaciamos paquetes y cerramos sockets y funciones
+	net_udp_close(i);
+	end;
+	net_quit();
+end
+
+
+Process vs_yoshi(x,y,graph);
+Begin
+	if(graph!=0) graph=graph-186; end
+	flags++;
+	frame;
+End
+Process vs_huevo(x,y,angle,fuerza);
+Private
+	grav;
+	giro;
+	disp_angle;
+Begin
+	suena(s1);
+	z=-2;
+	graph=518;
+	size=75;
+	grav=100;
+	while(!collision(type grafico))
+		if(collision(type vs_mode_servidor) or collision(type vs_mode_cliente))
+			muere=1;
+			break;
+		end
+		if(y=<462)
+			angle=giro;
+			angle+=6000;
+			grav-=5;
+			y-=grav/10;
+			giro=angle;
+		else
+			break;
+		end
+		frame;
+		angle=disp_angle;
+		advance(fuerza);
+	end
+	p1_disparos[2]=0;
+End

@@ -1,0 +1,59 @@
+Global
+	lng_elegido;
+End
+
+Process elige_lenguaje();
+Private
+	num_langs;
+Begin
+	z=0;
+	frame;
+	put_screen(0,load_png(".\cosas\pixpang2.png"));	
+	while(glob("lng/*.lng")!="" and x<30)
+		fichero_lng[x]=substr(fileinfo.name,0,len(fileinfo.name)-4);
+			bandera(x);
+			x++;
+			num_langs++;
+		frame(400);
+	end
+	num_langs--;
+	while(!key(_enter)) 
+		if(key(_up) and lng_elegido>0) lng_elegido--; while(key(_up)) frame; end end
+		if(key(_left) and lng_elegido>5) lng_elegido-=6; while(key(_left)) frame; end end
+		if(key(_down) and lng_elegido<11 and num_langs>lng_elegido) lng_elegido++; while(key(_down)) frame; end end
+		if(key(_right) and lng_elegido<6 and num_langs>lng_elegido+5) lng_elegido+=6; while(key(_right)) frame; end end
+		frame; 
+	end
+	ops.op_lang=lng_elegido;
+	If(op_guardar)
+	    If(pixpangcd) 
+    	    	save("c:\PiXPang\opciones.dat",ops);
+	    Else                                    
+	    	    save(".\opciones.dat",ops);
+	    End
+	End
+	logos();
+End
+
+Process bandera(pais);
+Begin
+	if(pais<6)
+		x=120;
+		y=100+80*pais;
+		write(fnt2,190,80+80*pais,0,fichero_lng[pais]);
+	else
+		x=420;
+		y=-380+80*pais;
+		write(fnt2,490,-400+80*pais,0,fichero_lng[pais]);
+	end
+	graph=load_png("lng/"+fichero_lng[pais]+".png");
+	while(ops.op_lang==-1)
+		if(lng_elegido==pais) alpha=255; size=90; else alpha=128; size=70; end
+		frame;
+	end
+	if(ops.op_lang==pais)
+		from alpha=255 to 0 step -10; size+=5; end
+	else
+		from alpha=255 to 0 step -10; size-=5; end
+	end
+End

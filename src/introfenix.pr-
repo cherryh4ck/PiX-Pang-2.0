@@ -1,0 +1,190 @@
+Global
+	id_intro_fenix_pajaro;
+End
+
+Process intro_fenix();
+Begin
+	set_fps(60,9);
+	alpha=0;
+	z=2;
+	x=400; y=300;
+	frame(6000);
+	parpadeo();
+	frame(6000);
+	parpadeo();
+	frame(6000);
+	parpadeo();
+	frame;
+	id_intro_fenix_pajaro=intro_fenix_pajaro();
+	anim_global();
+	while(alpha>5) alpha-=10; frame; end
+End
+
+Process intro_fenix_pajaro();
+Private
+	txt_fenix[1];
+	grafs[2];
+Begin
+	alpha=255;
+	z=-1;
+	grafs[0]=load_png(".\cosas\pajaro1.png");
+	grafs[1]=load_png(".\cosas\pajaro2.png");
+	grafs[2]=load_png(".\cosas\pajaro3.png");
+	graph=grafs[0];
+	x=400; y=440;
+	while(y>250)
+		y-=4; frame;
+		intro_fenix_sombra(x,y,graph,flags,size);
+	End
+	timer[2]=0;
+	parpadeo();
+	frame;
+	txt_fenix[0]=write(0,600,300,4,"Fenix");
+	graph=grafs[1];
+	while(timer[2]<100)
+		Frame;
+	End
+	parpadeo();
+	timer[2]=0;
+	frame;
+	txt_fenix[0]=write(0,600,308,4,"Proyecto 1.0");
+	intro_fenix_estela();
+	intro_fenix_estelar();
+	animglobal=0;
+	While(timer[2]<500)
+		x=rand(396,404); y=rand(298,302);
+		y=y-30+animglobal;
+		If(animglobal<30) 
+			graph=grafs[1]; 
+		Else 
+			graph=grafs[2]; 
+		End
+		If(animglobal==60)
+			if(flags==0) flags=1; else flags=0; end
+			parpadeo();
+		End
+		Frame;
+		intro_fenix_sombra(x,y,graph,flags,size);
+	End
+	While(y>-260)
+		y-=8;
+		if(size<300) size+=2; End
+		If(animglobal<15) 
+			graph=grafs[1]; 
+		End
+		If(animglobal>14 and animglobal<30) 
+			graph=grafs[2];
+		End
+		If(animglobal>29 and animglobal<45) 
+			graph=grafs[1]; 
+		End
+		If(animglobal>44 and animglobal<60) 
+			graph=grafs[2]; 
+		End
+		frame;
+		intro_fenix_sombra(x,y,graph,flags,size);
+	End
+	while(alpha>11)
+		y+=10;
+		if(size<500) size+=4; End
+		if(y>450) alpha-=10; end
+		If(animglobal<15) 
+			graph=grafs[1]; 
+		End
+		If(animglobal>14 and animglobal<30) 
+			graph=grafs[2];
+		End
+		If(animglobal>29 and animglobal<45) 
+			graph=grafs[1]; 
+		End
+		If(animglobal>44 and animglobal<60) 
+			graph=grafs[2]; 
+		End
+		frame;
+	End
+	while(size>0) size-=5; end
+	let_me_alone();
+	delete_text(all_text);
+	If(ops.op_lang==-1) if(!exists(id_lang)) id_lang=elige_lenguaje(); end Else id_titulo=titulo(); End
+End
+
+Process intro_fenix_estela();
+Private
+	anim_estela;
+	grafs[1];
+Begin
+	z=0;
+	alpha=255;
+	grafs[0]=load_png(".\cosas\estela1.png");
+	grafs[1]=load_png(".\cosas\estela2.png");
+	Loop
+		if(exists(id_intro_fenix_pajaro))
+			x=id_intro_fenix_pajaro.x;
+			y=id_intro_fenix_pajaro.y;
+			alpha=id_intro_fenix_pajaro.alpha;
+			flags=id_intro_fenix_pajaro.flags;
+			size=id_intro_fenix_pajaro.size;
+		Else
+			return;
+		End
+		If(anim_estela<10)
+			graph=grafs[0]; 
+		Else
+			graph=grafs[1];
+		End
+		anim_estela++;
+		if(anim_estela==20) 
+			anim_estela=0; 
+		End
+		Frame;
+		if(alpha==255) intro_fenix_sombra(x,y,graph,flags,size); end
+	End
+End
+
+Process intro_fenix_sombra(x,y,graph,flags,size);
+Begin
+	flags+=4;
+	frame;
+End
+
+Process intro_fenix_estelar();
+Private
+	num_puntos;
+Begin
+	loop
+		If(exists(id_intro_fenix_pajaro))
+			x=id_intro_fenix_pajaro.x;
+			y=id_intro_fenix_pajaro.y;
+			flags=id_intro_fenix_pajaro.flags;
+		Else
+			return;
+		End
+		num_puntos=0;
+		while(num_puntos<2) 
+			intro_fenix_estrellas(x,y,flags); 
+			num_puntos++;
+		end
+		Frame;
+	end
+End
+
+Process intro_fenix_estrellas(x,y,flags);
+Private
+	aceleracion;
+	angulo;
+Begin
+	angulo=rand(0,340000);
+	graph=new_map(8,8,16);
+	drawing_color(rand(0,65536));
+	drawing_map(0,graph);
+	draw_fcircle(4,4,4);
+	while(x>-200 or x<1000 or y>-100 or y>700)
+		aceleracion++;
+		If(exists(id_intro_fenix_pajaro))
+			size=id_intro_fenix_pajaro.size;
+		End
+		if(flags==1) angle=angulo; else angle=-angulo; end
+		advance(2+(aceleracion/5));
+		frame;
+	end
+End
