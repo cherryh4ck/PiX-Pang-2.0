@@ -30,6 +30,13 @@ En teoría, lo parcheado es lo siguiente:
 
 ---
 
+## Otros usos
+Técnicamente al ser **pixpang.exe** un intérprete parcheado de Fénix, podríamos usarlo para correr otra clase de juegos.
+
+En lo personal, no lo he probado del todo, pero tuve suerte con una versión demasiado vieja de PiX Pang. Eso sí, probé con la 1.6 y estas no corren, probablemente sea debido a un bug que mencionaré posteriormente.
+
+---
+
 ## Bugs
 **1. El modo de pantalla completa no funciona.**
 
