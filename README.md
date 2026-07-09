@@ -1,5 +1,6 @@
 # PiX Pang 2.0
 **PiX Pang 2.0** pero con soporte para Windows Vista en adelante.
+
 ![Screen](git/demo.png)
 
 ---
