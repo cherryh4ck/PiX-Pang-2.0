@@ -24,5 +24,16 @@ Lo que hice fue parchear el binario de **pixpang.exe** (que como tal, es simplem
 
 En teoría, lo parcheado es lo siguiente:
 * Carga de DCB
-* File I/O
+* File I/O (fopen() y fgets())
 * Carga de FPG
+
+---
+
+## Bugs
+**1. El modo de pantalla completa no funciona.**
+
+> Solución: Reemplaza las librerías de la carpeta raíz por las de la carpeta **fs-patch**.
+
+**2. Mi configuración no se guarda / Mi partida no se guarda**
+
+> Solución: Por ahora no la hay, luego le echo un vistazo. Probablemente sea el mismo problema del File I/O.
