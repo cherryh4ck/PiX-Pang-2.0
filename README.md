@@ -5,7 +5,7 @@
 ---
 
 ## ¿Por qué?
-Recordemos que PiX Pang 2.0 está compilado en una build de Fénix 0.84, la cual es del 15 de noviembre de 2025, en aquel entonces Windows Vista ni siquiera estaba cerca de lanzarse.
+Recordemos que PiX Pang 2.0 está compilado en una build de Fénix 0.84, la cual es del 15 de noviembre del 2003, en aquel entonces Windows Vista ni siquiera estaba cerca de lanzarse.
 
 Tras la salida de Windows Vista, resultó que todos los juegos que se hicieron con Fénix 0.84 dejaron de funcionar, con el error más común siendo el "Error al abrir (juego).dcb".
 
