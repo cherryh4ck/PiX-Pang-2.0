@@ -45,4 +45,5 @@ En lo personal, no lo he probado del todo, pero tuve suerte con una versión dem
 **2. Mi configuración no se guarda / Mi partida no se guarda**
 
 > Solución: ~~Por ahora no la hay, luego le echo un vistazo. Probablemente sea el mismo problema del File I/O.~~
+> 
 > Debería estar solucionado con el último parche. 
